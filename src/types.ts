@@ -5,4 +5,7 @@ export interface UserSession {
   refreshToken: string;
 }
 
-export type ActiveScreen = 'login' | 'success-landing';
+export type ActiveScreen = 'login' | 'register' | 'success-landing';
+
+/** RF-01: tipoDocumento se guarda como texto libre en el backend (sin catálogo fijo); estos son los valores que ofrece el formulario. */
+export type DocumentType = 'CC' | 'CE' | 'TI' | 'PAS';

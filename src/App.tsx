@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { UserSession, ActiveScreen } from './types';
 import { Header } from './components/Header';
 import { LoginView } from './components/LoginView';
+import { RegisterScreen } from './components/RegisterScreen';
 import { SuccessView } from './components/SuccessView';
 import { SupportModal } from './components/SupportModal';
 import { PasswordRecoveryModal } from './components/PasswordRecoveryModal';
-import { RegistrationModal } from './components/RegistrationModal';
 
 export default function App() {
   const [session, setSession] = useState<UserSession | null>(null);
@@ -15,7 +15,6 @@ export default function App() {
   // Modals
   const [isSupportOpen, setIsSupportOpen] = useState(false);
   const [isRecoveryOpen, setIsRecoveryOpen] = useState(false);
-  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
 
   const handleLoginSuccess = (newSession: UserSession) => {
     setSession(newSession);
@@ -44,7 +43,14 @@ export default function App() {
           <LoginView
             onLoginSuccess={handleLoginSuccess}
             onOpenRecovery={() => setIsRecoveryOpen(true)}
-            onOpenRegister={() => setIsRegisterOpen(true)}
+            onOpenRegister={() => setActiveScreen('register')}
+          />
+        )}
+
+        {activeScreen === 'register' && (
+          <RegisterScreen
+            onGoToLogin={() => setActiveScreen('login')}
+            onOpenSupport={() => setIsSupportOpen(true)}
           />
         )}
 
@@ -75,11 +81,6 @@ export default function App() {
       <PasswordRecoveryModal
         isOpen={isRecoveryOpen}
         onClose={() => setIsRecoveryOpen(false)}
-      />
-
-      <RegistrationModal
-        isOpen={isRegisterOpen}
-        onClose={() => setIsRegisterOpen(false)}
       />
     </div>
   );
