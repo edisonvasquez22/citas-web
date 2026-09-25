@@ -7,9 +7,10 @@ interface SuccessViewProps {
   session: UserSession;
   onLogout: () => void;
   language: 'ES' | 'EN';
+  onGoToBooking: () => void;
 }
 
-export const SuccessView: React.FC<SuccessViewProps> = ({ session, onLogout, language }) => {
+export const SuccessView: React.FC<SuccessViewProps> = ({ session, onLogout, language, onGoToBooking }) => {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
@@ -69,7 +70,16 @@ export const SuccessView: React.FC<SuccessViewProps> = ({ session, onLogout, lan
           </div>
 
           {/* Action buttons */}
-          <div className="w-full">
+          <div className="w-full flex flex-col gap-2">
+            <button
+              onClick={onGoToBooking}
+              className="w-full py-2.5 px-4 bg-[#006066] hover:bg-[#0d7a82] text-white text-[13px] font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              type="button"
+            >
+              <span className="material-symbols-outlined text-[18px]">calendar_add_on</span>
+              <span>{language === 'ES' ? 'Agendar una cita' : 'Book an appointment'}</span>
+            </button>
+
             <button
               onClick={handleLogout}
               disabled={isLoggingOut}

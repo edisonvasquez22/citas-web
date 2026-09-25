@@ -6,6 +6,7 @@ import { RegisterScreen } from './components/RegisterScreen';
 import { SuccessView } from './components/SuccessView';
 import { SupportModal } from './components/SupportModal';
 import { PasswordRecoveryModal } from './components/PasswordRecoveryModal';
+import { AgendarCitaScreen } from './components/AgendarCitaScreen';
 
 export default function App() {
   const [session, setSession] = useState<UserSession | null>(null);
@@ -55,7 +56,16 @@ export default function App() {
         )}
 
         {activeScreen === 'success-landing' && session && (
-          <SuccessView session={session} onLogout={handleLogout} language={language} />
+          <SuccessView
+            session={session}
+            onLogout={handleLogout}
+            language={language}
+            onGoToBooking={() => setActiveScreen('agendar-cita')}
+          />
+        )}
+
+        {activeScreen === 'agendar-cita' && session && (
+          <AgendarCitaScreen session={session} onVolverInicio={() => setActiveScreen('success-landing')} />
         )}
       </main>
 
