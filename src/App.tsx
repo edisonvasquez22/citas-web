@@ -7,6 +7,7 @@ import { SuccessView } from './components/SuccessView';
 import { SupportModal } from './components/SupportModal';
 import { PasswordRecoveryModal } from './components/PasswordRecoveryModal';
 import { AgendarCitaScreen } from './components/AgendarCitaScreen';
+import { DisponibilidadProfesionalScreen } from './components/DisponibilidadProfesionalScreen';
 
 export default function App() {
   const [session, setSession] = useState<UserSession | null>(null);
@@ -19,7 +20,8 @@ export default function App() {
 
   const handleLoginSuccess = (newSession: UserSession) => {
     setSession(newSession);
-    setActiveScreen('success-landing');
+    // PROFESSIONAL aterriza directo en su calendario (HU-012); no hay pantalla de landing propia para ese rol.
+    setActiveScreen(newSession.roles.includes('PROFESSIONAL') ? 'mi-disponibilidad' : 'success-landing');
   };
 
   const handleLogout = () => {
@@ -66,6 +68,10 @@ export default function App() {
 
         {activeScreen === 'agendar-cita' && session && (
           <AgendarCitaScreen session={session} onVolverInicio={() => setActiveScreen('success-landing')} />
+        )}
+
+        {activeScreen === 'mi-disponibilidad' && session && (
+          <DisponibilidadProfesionalScreen session={session} />
         )}
       </main>
 

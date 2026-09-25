@@ -1,11 +1,19 @@
-/** Sesión autenticada. Solo trae lo que devuelve POST /api/auth/login (accessToken, refreshToken); no hay endpoint de perfil todavía (EP-002, sin aprobar). */
+/** Nombres de rol tal como los emite JwtTokenProviderAdapter en el claim "roles" del accessToken. */
+export type Rol = 'USER' | 'PROFESSIONAL' | 'ADMIN';
+
+/**
+ * Sesión autenticada. POST /api/auth/login solo devuelve accessToken/refreshToken (no hay endpoint de
+ * perfil todavía, EP-002 sin aprobar); `roles` se decodifica en cliente del propio JWT (ver utils/jwt.ts),
+ * no se inventa ni se consulta a un endpoint que no existe.
+ */
 export interface UserSession {
   email: string;
   accessToken: string;
   refreshToken: string;
+  roles: Rol[];
 }
 
-export type ActiveScreen = 'login' | 'register' | 'success-landing' | 'agendar-cita';
+export type ActiveScreen = 'login' | 'register' | 'success-landing' | 'agendar-cita' | 'mi-disponibilidad';
 
 /** RF-01: tipoDocumento se guarda como texto libre en el backend (sin catálogo fijo); estos son los valores que ofrece el formulario. */
 export type DocumentType = 'CC' | 'CE' | 'TI' | 'PAS';
@@ -66,6 +74,21 @@ export interface AppointmentResult {
   estado: 'APPROVED' | 'REQUESTED';
   inicio: string;
   fin: string;
+}
+
+/**
+ * GET/POST/PUT /api/professionals/me/availability-blocks (HU-012). No incluye información de citas
+ * asignadas: el backend no expone eso en este recurso (ver DisponibilidadProfesionalController), así que
+ * la UI no debe inventar contadores de pacientes/cupos comprometidos que la API no devuelve.
+ */
+export interface AvailabilityBlockApi {
+  id: number;
+  profesionalId: number;
+  sedeId: SedeId;
+  fecha: string; // YYYY-MM-DD
+  horaInicio: string; // HH:mm:ss
+  horaFin: string; // HH:mm:ss
+  activo: boolean;
 }
 
 /** Forma del error que ya devuelve el backend (ApiError, ver contratos.md). */

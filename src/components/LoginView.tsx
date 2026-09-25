@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { UserSession } from '../types';
+import { decodeRolesFromAccessToken } from '../utils/jwt';
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
 
@@ -112,7 +113,8 @@ export const LoginView: React.FC<LoginViewProps> = ({
       const newSession: UserSession = {
         email: cleanEmail,
         accessToken: data.accessToken,
-        refreshToken: data.refreshToken
+        refreshToken: data.refreshToken,
+        roles: decodeRolesFromAccessToken(data.accessToken)
       };
 
       onLoginSuccess(newSession);
