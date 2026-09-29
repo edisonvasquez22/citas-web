@@ -13,7 +13,17 @@ export interface UserSession {
   roles: Rol[];
 }
 
-export type ActiveScreen = 'login' | 'register' | 'success-landing' | 'agendar-cita' | 'mi-disponibilidad';
+export type ActiveScreen =
+  | 'login'
+  | 'register'
+  | 'success-landing'
+  | 'agendar-cita'
+  | 'mis-citas'
+  | 'mi-agenda'
+  | 'mi-disponibilidad'
+  | 'aprobacion-citas'
+  | 'admin-catalogo'
+  | 'admin-reprogramaciones';
 
 /** RF-01: tipoDocumento se guarda como texto libre en el backend (sin catálogo fijo); estos son los valores que ofrece el formulario. */
 export type DocumentType = 'CC' | 'CE' | 'TI' | 'PAS';
@@ -89,6 +99,118 @@ export interface AvailabilityBlockApi {
   horaInicio: string; // HH:mm:ss
   horaFin: string; // HH:mm:ss
   activo: boolean;
+}
+
+/**
+ * GET /api/admin/appointments/requested, POST .../approve, POST .../reject (HU-016). Solo trae IDs: no hay
+ * endpoint de perfil de paciente (EP-002 sin aprobar), así que la UI debe mostrar "Paciente #<id>" y resolver
+ * nombre de profesional/especialidad cruzando con /api/professionals y /api/specialties, no inventarlos.
+ */
+export interface AdminAppointmentApi {
+  citaId: number;
+  pacienteUsuarioId: number;
+  profesionalId: number;
+  sedeId: SedeId;
+  especialidadId: number;
+  estado: 'REQUESTED' | 'APPROVED' | 'REJECTED';
+  inicio: string;
+  fin: string;
+  motivoDecision: string | null;
+}
+
+/**
+ * GET/POST/PUT/PATCH /api/admin/professionals (HU-010/HU-011). A diferencia del directorio público
+ * (ProfessionalApi), este trae también inactivos y datos de contacto reales (vienen de Usuario, no de
+ * Profesional) — necesarios para que el ADMIN pueda listar y reactivar/desactivar. No incluye edición de
+ * contacto/especialidades: el backend hoy solo expone crear y cambiar estado.
+ */
+export interface ProfessionalAdminApi {
+  profesionalId: number;
+  usuarioId: number;
+  nombres: string;
+  apellidos: string;
+  tipoDocumento: string;
+  numeroDocumento: string;
+  email: string;
+  telefono: string;
+  codigoProfesional: string;
+  matricula: string;
+  activo: boolean;
+  especialidades: { especialidadId: number; primaria: boolean }[];
+  sedeIds: SedeId[];
+}
+
+/** Catálogo fijo `appointment_statuses` (V2), ver `EstadoCita.java`. */
+export type EstadoCita = 'REQUESTED' | 'APPROVED' | 'REJECTED' | 'CANCELLED' | 'COMPLETED' | 'NO_SHOW';
+
+/** Catálogo fijo `reschedule_request_statuses` (V2), ver `EstadoSolicitudReprogramacion.java`. */
+export type EstadoSolicitudReprogramacion = 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED';
+
+/**
+ * GET /api/appointments/mine (HU-017). Solo trae IDs de sede/profesional/especialidad — se resuelven
+ * cruzando con /api/professionals, /api/specialties y el catálogo fijo SEDES, mismo patrón que
+ * AdminAppointmentApi. motivoDecision solo viene informado si la cita fue rechazada (HU-016/HU-023).
+ */
+export interface MiCitaApi {
+  citaId: number;
+  sedeId: SedeId;
+  profesionalId: number;
+  especialidadId: number;
+  estado: EstadoCita;
+  inicio: string;
+  fin: string;
+  motivoDecision: string | null;
+}
+
+/** POST /api/appointments/{id}/cancel | /complete | /no-show (HU-018/HU-022). */
+export interface CierreResponse {
+  citaId: number;
+  estado: EstadoCita;
+}
+
+/**
+ * POST /api/appointments/{id}/reschedule (HU-019). No hay ningún endpoint que permita al propio USER
+ * consultar después el estado de su solicitud (solo existe GET /api/admin/reschedules, ADMIN-only) — la UI
+ * solo puede recordar esta respuesta mientras dura la sesión del navegador, no across reloads.
+ */
+export interface ReprogramarResponse {
+  solicitudId: number;
+  citaId: number;
+  estado: EstadoSolicitudReprogramacion;
+  inicioSolicitado: string;
+  finSolicitado: string;
+}
+
+/**
+ * GET /api/professionals/me/agenda (HU-021). Solo trae citas propias en estado APPROVED — una vez cerrada
+ * (COMPLETED/NO_SHOW vía HU-022) deja de aparecer aquí, no hay endpoint de historial. pacienteUsuarioId es
+ * solo el id: no hay endpoint de perfil de paciente (EP-002 sin aprobar), se muestra "Paciente #<id>".
+ */
+export interface CitaAgendaApi {
+  citaId: number;
+  pacienteUsuarioId: number;
+  sedeId: SedeId;
+  especialidadId: number;
+  inicio: string;
+  fin: string;
+}
+
+/**
+ * GET/POST /api/admin/reschedules/** (HU-020). Ojo: no trae especialidadId ni la sede anterior de la cita
+ * (solo sedeSolicitadaId, la nueva) — el contrato real no expone esos datos aquí, no inventarlos. El nombre
+ * del profesional se resuelve cruzando con /api/professionals, mismo patrón que AdminAppointmentApi.
+ */
+export interface SolicitudReprogramacionApi {
+  solicitudId: number;
+  citaId: number;
+  profesionalId: number;
+  sedeSolicitadaId: SedeId;
+  estado: EstadoSolicitudReprogramacion;
+  inicioAnterior: string;
+  finAnterior: string;
+  inicioSolicitado: string;
+  finSolicitado: string;
+  motivoDecision: string | null;
 }
 
 /** Forma del error que ya devuelve el backend (ApiError, ver contratos.md). */

@@ -1,12 +1,14 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { ApiErrorBody, AvailabilityBlockApi, SedeId, SEDES, UserSession } from '../types';
+import { ActiveScreen, ApiErrorBody, AvailabilityBlockApi, SedeId, SEDES, UserSession } from '../types';
 import { EditAvailabilityBlockModal } from './EditAvailabilityBlockModal';
 import { DeleteAvailabilityBlockModal } from './DeleteAvailabilityBlockModal';
+import { ProfessionalNavTabs } from './ProfessionalNavTabs';
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
 
 interface DisponibilidadProfesionalScreenProps {
   session: UserSession;
+  onNavigate: (screen: ActiveScreen) => void;
 }
 
 type PeriodoFiltro = 'todos' | 'semana-actual' | 'semana-siguiente';
@@ -47,7 +49,7 @@ function formatFechaLarga(fechaISO: string): string {
   return formatted.charAt(0).toUpperCase() + formatted.slice(1);
 }
 
-export const DisponibilidadProfesionalScreen: React.FC<DisponibilidadProfesionalScreenProps> = ({ session }) => {
+export const DisponibilidadProfesionalScreen: React.FC<DisponibilidadProfesionalScreenProps> = ({ session, onNavigate }) => {
   const authHeaders: HeadersInit = {
     'Content-Type': 'application/json',
     Authorization: `Bearer ${session.accessToken}`
@@ -223,6 +225,8 @@ export const DisponibilidadProfesionalScreen: React.FC<DisponibilidadProfesional
 
   return (
     <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-8 flex flex-col gap-6">
+      <ProfessionalNavTabs active="mi-disponibilidad" onNavigate={onNavigate} />
+
       {/* Encabezado de sección */}
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 pb-5 border-b border-[#eff4ff]">
         <div>

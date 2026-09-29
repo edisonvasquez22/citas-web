@@ -7,7 +7,12 @@ import { SuccessView } from './components/SuccessView';
 import { SupportModal } from './components/SupportModal';
 import { PasswordRecoveryModal } from './components/PasswordRecoveryModal';
 import { AgendarCitaScreen } from './components/AgendarCitaScreen';
+import { MisCitasScreen } from './components/MisCitasScreen';
 import { DisponibilidadProfesionalScreen } from './components/DisponibilidadProfesionalScreen';
+import { AgendaProfesionalScreen } from './components/AgendaProfesionalScreen';
+import { AprobacionCitasScreen } from './components/AprobacionCitasScreen';
+import { AdminCatalogoScreen } from './components/AdminCatalogoScreen';
+import { BandejaReprogramacionesScreen } from './components/BandejaReprogramacionesScreen';
 
 export default function App() {
   const [session, setSession] = useState<UserSession | null>(null);
@@ -20,8 +25,14 @@ export default function App() {
 
   const handleLoginSuccess = (newSession: UserSession) => {
     setSession(newSession);
-    // PROFESSIONAL aterriza directo en su calendario (HU-012); no hay pantalla de landing propia para ese rol.
-    setActiveScreen(newSession.roles.includes('PROFESSIONAL') ? 'mi-disponibilidad' : 'success-landing');
+    // PROFESSIONAL/ADMIN aterrizan directo en su pantalla de gestión (HU-012/HU-016); no hay landing propio para esos roles.
+    if (newSession.roles.includes('PROFESSIONAL')) {
+      setActiveScreen('mi-disponibilidad');
+    } else if (newSession.roles.includes('ADMIN')) {
+      setActiveScreen('aprobacion-citas');
+    } else {
+      setActiveScreen('success-landing');
+    }
   };
 
   const handleLogout = () => {
@@ -63,6 +74,7 @@ export default function App() {
             onLogout={handleLogout}
             language={language}
             onGoToBooking={() => setActiveScreen('agendar-cita')}
+            onGoToMisCitas={() => setActiveScreen('mis-citas')}
           />
         )}
 
@@ -70,8 +82,32 @@ export default function App() {
           <AgendarCitaScreen session={session} onVolverInicio={() => setActiveScreen('success-landing')} />
         )}
 
+        {activeScreen === 'mis-citas' && session && (
+          <MisCitasScreen
+            session={session}
+            onNuevaCita={() => setActiveScreen('agendar-cita')}
+            onVolverInicio={() => setActiveScreen('success-landing')}
+          />
+        )}
+
         {activeScreen === 'mi-disponibilidad' && session && (
-          <DisponibilidadProfesionalScreen session={session} />
+          <DisponibilidadProfesionalScreen session={session} onNavigate={setActiveScreen} />
+        )}
+
+        {activeScreen === 'mi-agenda' && session && (
+          <AgendaProfesionalScreen session={session} onNavigate={setActiveScreen} />
+        )}
+
+        {activeScreen === 'aprobacion-citas' && session && (
+          <AprobacionCitasScreen session={session} onNavigate={setActiveScreen} />
+        )}
+
+        {activeScreen === 'admin-catalogo' && session && (
+          <AdminCatalogoScreen session={session} onNavigate={setActiveScreen} />
+        )}
+
+        {activeScreen === 'admin-reprogramaciones' && session && (
+          <BandejaReprogramacionesScreen session={session} onNavigate={setActiveScreen} />
         )}
       </main>
 

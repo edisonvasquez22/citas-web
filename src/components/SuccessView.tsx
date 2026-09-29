@@ -8,9 +8,10 @@ interface SuccessViewProps {
   onLogout: () => void;
   language: 'ES' | 'EN';
   onGoToBooking: () => void;
+  onGoToMisCitas: () => void;
 }
 
-export const SuccessView: React.FC<SuccessViewProps> = ({ session, onLogout, language, onGoToBooking }) => {
+export const SuccessView: React.FC<SuccessViewProps> = ({ session, onLogout, language, onGoToBooking, onGoToMisCitas }) => {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
@@ -78,6 +79,15 @@ export const SuccessView: React.FC<SuccessViewProps> = ({ session, onLogout, lan
             >
               <span className="material-symbols-outlined text-[18px]">calendar_add_on</span>
               <span>{language === 'ES' ? 'Agendar una cita' : 'Book an appointment'}</span>
+            </button>
+
+            <button
+              onClick={onGoToMisCitas}
+              className="w-full py-2.5 px-4 bg-white hover:bg-[#eff4ff] text-[#006066] border border-[#dce9ff] text-[13px] font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              type="button"
+            >
+              <span className="material-symbols-outlined text-[18px]">event_note</span>
+              <span>{language === 'ES' ? 'Ver mis citas' : 'View my appointments'}</span>
             </button>
 
             <button
