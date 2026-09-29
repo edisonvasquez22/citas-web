@@ -22,12 +22,6 @@ interface MisCitasScreenProps {
 
 type FiltroEstado = 'ALL' | EstadoCita;
 
-interface ReprogramacionPendiente {
-  solicitudId: number;
-  inicioSolicitado: string;
-  finSolicitado: string;
-}
-
 const ESTADO_LABEL: Record<EstadoCita, string> = {
   APPROVED: 'Confirmada',
   REQUESTED: 'En revisión',
@@ -69,11 +63,6 @@ export const MisCitasScreen: React.FC<MisCitasScreenProps> = ({ session, onNueva
 
   const [citaParaCancelar, setCitaParaCancelar] = useState<MiCitaApi | null>(null);
   const [citaParaReprogramar, setCitaParaReprogramar] = useState<MiCitaApi | null>(null);
-
-  // No existe ningún endpoint para que el USER consulte el estado de sus propias solicitudes de
-  // reprogramación (solo GET /api/admin/reschedules, ADMIN-only) — esto solo recuerda lo que se solicitó
-  // en esta sesión del navegador; se pierde al recargar la página.
-  const [pendientes, setPendientes] = useState<Record<number, ReprogramacionPendiente>>({});
 
   const [banner, setBanner] = useState<{ tipo: 'success' | 'error'; texto: string } | null>(null);
 
@@ -133,19 +122,14 @@ export const MisCitasScreen: React.FC<MisCitasScreenProps> = ({ session, onNueva
   };
 
   const handleReprogramada = (resultado: ReprogramarResponse) => {
-    setPendientes((prev) => ({
-      ...prev,
-      [resultado.citaId]: {
-        solicitudId: resultado.solicitudId,
-        inicioSolicitado: resultado.inicioSolicitado,
-        finSolicitado: resultado.finSolicitado
-      }
-    }));
     setCitaParaReprogramar(null);
     setBanner({
       tipo: 'success',
       texto: `Solicitud de reprogramación #${resultado.solicitudId} enviada. Tu cita actual sigue vigente hasta que la administración decida.`
     });
+    // Refresca desde el backend en vez de guardar el resultado solo en memoria: GET /api/appointments/mine ya
+    // trae el desenlace real de la reprogramación (cita.reprogramacion), así que sobrevive a un recargo de página.
+    cargar();
   };
 
   const resetFiltros = () => {
@@ -337,10 +321,10 @@ export const MisCitasScreen: React.FC<MisCitasScreenProps> = ({ session, onNueva
           {citasFiltradas.map((cita) => {
             const colores = ESTADO_COLOR[cita.estado];
             const { fecha, hora } = formatFechaHora(cita.inicio);
-            const pendiente = pendientes[cita.citaId];
+            const reprogramacion = cita.reprogramacion;
             const esFutura = new Date(cita.inicio) > new Date();
             const puedeCancelar = (cita.estado === 'APPROVED' || cita.estado === 'REQUESTED') && esFutura;
-            const puedeReprogramar = cita.estado === 'APPROVED' && esFutura && !pendiente;
+            const puedeReprogramar = cita.estado === 'APPROVED' && esFutura && reprogramacion?.estado !== 'PENDING';
 
             return (
               <article
@@ -385,14 +369,39 @@ export const MisCitasScreen: React.FC<MisCitasScreenProps> = ({ session, onNueva
                     </div>
                   </div>
 
-                  {pendiente && (
+                  {reprogramacion?.estado === 'PENDING' && (
                     <div className="p-3 bg-amber-50/80 rounded-lg flex items-start gap-2.5 text-xs text-amber-950 border border-amber-200">
                       <span className="material-symbols-outlined text-[20px] text-amber-700 shrink-0 mt-0.5">hourglass_top</span>
                       <div className="flex-1">
                         <span className="font-semibold block text-amber-900">Reprogramación en espera de aprobación</span>
                         <p className="text-amber-800">
-                          Solicitud #{pendiente.solicitudId}: {formatFechaHora(pendiente.inicioSolicitado).fecha} ·{' '}
-                          {formatFechaHora(pendiente.inicioSolicitado).hora}. Tu cita actual sigue vigente.
+                          Solicitud #{reprogramacion.solicitudId}: {formatFechaHora(reprogramacion.inicioSolicitado).fecha} ·{' '}
+                          {formatFechaHora(reprogramacion.inicioSolicitado).hora}. Tu cita actual sigue vigente.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {reprogramacion?.estado === 'APPROVED' && (
+                    <div className="p-3 bg-emerald-50/80 rounded-lg flex items-start gap-2.5 text-xs text-emerald-950 border border-emerald-200">
+                      <span className="material-symbols-outlined text-[20px] text-emerald-700 shrink-0 mt-0.5">event_available</span>
+                      <div className="flex-1">
+                        <span className="font-semibold block text-emerald-900">Reprogramación aprobada</span>
+                        <p className="text-emerald-800">
+                          Solicitud #{reprogramacion.solicitudId}: tu cita quedó confirmada en el nuevo horario.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {reprogramacion?.estado === 'REJECTED' && (
+                    <div className="p-3 bg-red-50/80 rounded-lg flex items-start gap-2.5 text-xs text-red-950 border border-red-200">
+                      <span className="material-symbols-outlined text-[20px] text-[#ba1a1a] shrink-0 mt-0.5">report_problem</span>
+                      <div className="flex-1">
+                        <span className="font-semibold block text-[#93000a]">Reprogramación rechazada</span>
+                        <p className="text-red-800">
+                          Solicitud #{reprogramacion.solicitudId}: tu cita conserva su horario original.
+                          {reprogramacion.motivoDecision && <> Motivo: {reprogramacion.motivoDecision}</>}
                         </p>
                       </div>
                     </div>

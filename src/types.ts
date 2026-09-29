@@ -147,6 +147,19 @@ export type EstadoCita = 'REQUESTED' | 'APPROVED' | 'REJECTED' | 'CANCELLED' | '
 export type EstadoSolicitudReprogramacion = 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED';
 
 /**
+ * Desenlace de la última solicitud de reprogramación de una cita (HU-019/HU-020), o null si nunca se pidió
+ * una. El estado de la cita no cambia mientras la solicitud está PENDING (RN-10) — esta es la única forma en
+ * que el paciente conoce el resultado de su propia solicitud, incluida tras recargar la página.
+ */
+export interface ReprogramacionInfoApi {
+  solicitudId: number;
+  estado: EstadoSolicitudReprogramacion;
+  inicioSolicitado: string;
+  finSolicitado: string;
+  motivoDecision: string | null;
+}
+
+/**
  * GET /api/appointments/mine (HU-017). Solo trae IDs de sede/profesional/especialidad — se resuelven
  * cruzando con /api/professionals, /api/specialties y el catálogo fijo SEDES, mismo patrón que
  * AdminAppointmentApi. motivoDecision solo viene informado si la cita fue rechazada (HU-016/HU-023).
@@ -160,6 +173,7 @@ export interface MiCitaApi {
   inicio: string;
   fin: string;
   motivoDecision: string | null;
+  reprogramacion: ReprogramacionInfoApi | null;
 }
 
 /** POST /api/appointments/{id}/cancel | /complete | /no-show (HU-018/HU-022). */
