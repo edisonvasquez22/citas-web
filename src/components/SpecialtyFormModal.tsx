@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ApiErrorBody, SpecialtyApi, UserSession } from '../types';
 import { API_URL, apiFetch } from '../api/session';
+import { t } from '../i18n';
 
 
 interface SpecialtyFormModalProps {
@@ -51,7 +52,7 @@ export const SpecialtyFormModal: React.FC<SpecialtyFormModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!codigo.trim() || !nombre.trim()) {
-      setError('Código y nombre son obligatorios.');
+      setError(t("Código y nombre son obligatorios."));
       return;
     }
 
@@ -72,11 +73,13 @@ export const SpecialtyFormModal: React.FC<SpecialtyFormModalProps> = ({
 
       if (resp.status === 400) {
         const err: ApiErrorBody = await resp.json();
-        setError(err.message || 'No se pudo guardar la especialidad.');
+        setError(err.message || t("No se pudo guardar la especialidad."));
         return;
       }
       if (!resp.ok) {
-        setError('Error de conexión con el servidor institucional. Inténtalo de nuevo más tarde.');
+        setError(t(
+          "Error de conexión con el servidor institucional. Inténtalo de nuevo más tarde."
+        ));
         return;
       }
 
@@ -84,7 +87,9 @@ export const SpecialtyFormModal: React.FC<SpecialtyFormModalProps> = ({
       onSaved(guardada, mode);
       onClose();
     } catch {
-      setError('No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo.');
+      setError(t(
+        "No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo."
+      ));
     } finally {
       setSaving(false);
     }
@@ -107,14 +112,16 @@ export const SpecialtyFormModal: React.FC<SpecialtyFormModalProps> = ({
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-[#006066]">medical_services</span>
               <h3 className="font-display font-semibold text-[17px] text-[#0d1c2e]">
-                {mode === 'create' ? 'Nueva Especialidad' : `Editar Especialidad: ${specialtyToEdit?.codigo}`}
+                {mode === 'create' ? t("Nueva Especialidad") : t("Editar Especialidad: {v}", {
+                  v: specialtyToEdit?.codigo
+                })}
               </h3>
             </div>
             <button
               type="button"
               onClick={onClose}
               className="text-[#6e797a] hover:text-[#0d1c2e] p-1 rounded-md hover:bg-[#eff4ff]"
-              aria-label="Cerrar modal"
+              aria-label={t("Cerrar modal")}
             >
               <span className="material-symbols-outlined text-[18px]">close</span>
             </button>
@@ -130,7 +137,7 @@ export const SpecialtyFormModal: React.FC<SpecialtyFormModalProps> = ({
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
               <label htmlFor="spec-codigo" className="text-[13px] font-semibold text-[#0d1c2e]">
-                Código <span className="text-[#ba1a1a]">*</span>
+                {t("Código")} <span className="text-[#ba1a1a]">*</span>
               </label>
               <input
                 id="spec-codigo"
@@ -138,31 +145,31 @@ export const SpecialtyFormModal: React.FC<SpecialtyFormModalProps> = ({
                 value={codigo}
                 disabled={mode === 'edit'}
                 onChange={(e) => setCodigo(e.target.value.toUpperCase())}
-                placeholder="Ej: CARDIO"
+                placeholder={t("Ej: CARDIO")}
                 className={`w-full px-3.5 py-2.5 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#0d7a82] transition-all border ${
                   mode === 'edit' ? 'bg-[#eff4ff] text-[#6e797a] border-transparent cursor-not-allowed' : 'bg-white border-[#bdc9ca]'
                 }`}
               />
-              {mode === 'edit' && <span className="text-[11px] text-[#6e797a]">El código no se puede editar una vez creado.</span>}
+              {mode === 'edit' && <span className="text-[11px] text-[#6e797a]">{t("El código no se puede editar una vez creado.")}</span>}
             </div>
 
             <div className="flex flex-col gap-1.5">
               <label htmlFor="spec-nombre" className="text-[13px] font-semibold text-[#0d1c2e]">
-                Nombre <span className="text-[#ba1a1a]">*</span>
+                {t("Nombre")} <span className="text-[#ba1a1a]">*</span>
               </label>
               <input
                 id="spec-nombre"
                 type="text"
                 value={nombre}
                 onChange={(e) => setNombre(e.target.value)}
-                placeholder="Ej: Cardiología Clínica"
+                placeholder={t("Ej: Cardiología Clínica")}
                 className="w-full px-3.5 py-2.5 bg-white border border-[#bdc9ca] rounded-lg text-sm text-[#0d1c2e] focus:outline-none focus:ring-2 focus:ring-[#0d7a82] transition-all"
               />
             </div>
 
             <div className="flex flex-col gap-1.5">
               <label htmlFor="spec-duracion" className="text-[13px] font-semibold text-[#0d1c2e]">
-                Duración <span className="text-[#ba1a1a]">*</span>
+                {t("Duración")} <span className="text-[#ba1a1a]">*</span>
               </label>
               <select
                 id="spec-duracion"
@@ -170,8 +177,8 @@ export const SpecialtyFormModal: React.FC<SpecialtyFormModalProps> = ({
                 onChange={(e) => setDuracionMinutos(Number(e.target.value) as 30 | 60)}
                 className="w-full px-3.5 py-2.5 bg-white border border-[#bdc9ca] rounded-lg text-sm text-[#0d1c2e] focus:outline-none focus:ring-2 focus:ring-[#0d7a82] transition-all"
               >
-                <option value={30}>30 minutos</option>
-                <option value={60}>60 minutos</option>
+                <option value={30}>{t("30 minutos")}</option>
+                <option value={60}>{t("60 minutos")}</option>
               </select>
             </div>
 
@@ -183,7 +190,7 @@ export const SpecialtyFormModal: React.FC<SpecialtyFormModalProps> = ({
                   onChange={(e) => setGeneral(e.target.checked)}
                   className="mt-0.5 rounded text-[#0d7a82] focus:ring-[#006066]"
                 />
-                <span className="text-[12px] text-[#0d1c2e]">Es consulta general (aparece en el flujo de cita general)</span>
+                <span className="text-[12px] text-[#0d1c2e]">{t("Es consulta general (aparece en el flujo de cita general)")}</span>
               </label>
               <label className="flex items-start gap-2.5 cursor-pointer">
                 <input
@@ -192,7 +199,7 @@ export const SpecialtyFormModal: React.FC<SpecialtyFormModalProps> = ({
                   onChange={(e) => setRequiereAprobacionAdmin(e.target.checked)}
                   className="mt-0.5 rounded text-[#0d7a82] focus:ring-[#006066]"
                 />
-                <span className="text-[12px] text-[#0d1c2e]">Requiere aprobación administrativa</span>
+                <span className="text-[12px] text-[#0d1c2e]">{t("Requiere aprobación administrativa")}</span>
               </label>
             </div>
 
@@ -202,7 +209,7 @@ export const SpecialtyFormModal: React.FC<SpecialtyFormModalProps> = ({
                 onClick={onClose}
                 className="px-4 py-2 rounded-lg border border-[#bdc9ca] text-[13px] font-semibold text-[#3e494a] hover:bg-[#eff4ff] transition-colors"
               >
-                Cancelar
+                {t("Cancelar")}
               </button>
               <button
                 type="submit"
@@ -210,7 +217,7 @@ export const SpecialtyFormModal: React.FC<SpecialtyFormModalProps> = ({
                 className="px-4 py-2 rounded-lg bg-[#006066] hover:bg-[#0d7a82] text-white text-[13px] font-semibold flex items-center gap-1.5 shadow-sm transition-all disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <span className="material-symbols-outlined text-[16px]">check</span>
-                <span>{saving ? 'Guardando...' : mode === 'create' ? 'Crear Especialidad' : 'Guardar Cambios'}</span>
+                <span>{saving ? 'Guardando...' : mode === 'create' ? t("Crear Especialidad") : t("Guardar Cambios")}</span>
               </button>
             </div>
           </form>

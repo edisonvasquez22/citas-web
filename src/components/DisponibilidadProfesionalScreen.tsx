@@ -4,6 +4,7 @@ import { EditAvailabilityBlockModal } from './EditAvailabilityBlockModal';
 import { DeleteAvailabilityBlockModal } from './DeleteAvailabilityBlockModal';
 import { ProfessionalNavTabs } from './ProfessionalNavTabs';
 import { API_URL, apiFetch } from '../api/session';
+import { locale, t } from '../i18n';
 
 
 interface DisponibilidadProfesionalScreenProps {
@@ -45,7 +46,7 @@ function rangoSemana(offsetSemanas: number): [string, string] {
 function formatFechaLarga(fechaISO: string): string {
   const [y, m, d] = fechaISO.split('-').map(Number);
   const date = new Date(y, m - 1, d);
-  const formatted = date.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const formatted = date.toLocaleDateString(locale(), { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   return formatted.charAt(0).toUpperCase() + formatted.slice(1);
 }
 
@@ -89,10 +90,12 @@ export const DisponibilidadProfesionalScreen: React.FC<DisponibilidadProfesional
       const data: AvailabilityBlockApi[] = await resp.json();
       setBlocks(data);
       if (isRefresh) {
-        setFeedback({ type: 'info', title: 'Agenda actualizada', message: 'Se recargaron tus bloques de disponibilidad.' });
+        setFeedback({ type: 'info', title: t("Agenda actualizada"), message: t("Se recargaron tus bloques de disponibilidad.") });
       }
     } catch {
-      setLoadError('No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo.');
+      setLoadError(t(
+        "No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo."
+      ));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -111,11 +114,11 @@ export const DisponibilidadProfesionalScreen: React.FC<DisponibilidadProfesional
 
     const duracion = calcularDuracionMinutos(formHoraInicio, formHoraFin);
     if (duracion <= 0) {
-      setFormError('La hora de fin debe ser posterior a la hora de inicio.');
+      setFormError(t("La hora de fin debe ser posterior a la hora de inicio."));
       return;
     }
     if (duracion % 30 !== 0) {
-      setFormError('El bloque debe durar un múltiplo exacto de 30 minutos.');
+      setFormError(t("El bloque debe durar un múltiplo exacto de 30 minutos."));
       return;
     }
 
@@ -134,11 +137,13 @@ export const DisponibilidadProfesionalScreen: React.FC<DisponibilidadProfesional
 
       if (resp.status === 400) {
         const err: ApiErrorBody = await resp.json();
-        setFormError(err.message || 'No se pudo crear el bloque. Verifica los datos ingresados.');
+        setFormError(err.message || t("No se pudo crear el bloque. Verifica los datos ingresados."));
         return;
       }
       if (!resp.ok) {
-        setFormError('Error de conexión con el servidor institucional. Inténtalo de nuevo más tarde.');
+        setFormError(t(
+          "Error de conexión con el servidor institucional. Inténtalo de nuevo más tarde."
+        ));
         return;
       }
 
@@ -146,11 +151,21 @@ export const DisponibilidadProfesionalScreen: React.FC<DisponibilidadProfesional
       setBlocks((prev) => [...prev, nuevo]);
       setFeedback({
         type: 'success',
-        title: 'Bloque creado',
-        message: `Bloque en ${SEDES[formSedeId].corto} para el ${formFecha} (${formHoraInicio} - ${formHoraFin}) publicado correctamente.`
+        title: t("Bloque creado"),
+        message: t(
+          "Bloque en {corto} para el {formFecha} ({formHoraInicio} - {formHoraFin}) publicado correctamente.",
+          {
+            corto: SEDES[formSedeId].corto,
+            formFecha: formFecha,
+            formHoraInicio: formHoraInicio,
+            formHoraFin: formHoraFin
+          }
+        )
       });
     } catch {
-      setFormError('No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo.');
+      setFormError(t(
+        "No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo."
+      ));
     } finally {
       setCreating(false);
     }
@@ -166,12 +181,12 @@ export const DisponibilidadProfesionalScreen: React.FC<DisponibilidadProfesional
 
   const handleUpdated = (actualizado: AvailabilityBlockApi) => {
     setBlocks((prev) => prev.map((b) => (b.id === actualizado.id ? actualizado : b)));
-    setFeedback({ type: 'success', title: 'Bloque actualizado', message: 'Los cambios de horario se guardaron correctamente.' });
+    setFeedback({ type: 'success', title: t("Bloque actualizado"), message: t("Los cambios de horario se guardaron correctamente.") });
   };
 
   const handleDeleted = (id: number) => {
     setBlocks((prev) => prev.filter((b) => b.id !== id));
-    setFeedback({ type: 'info', title: 'Bloque eliminado', message: 'El bloque se eliminó y ya no está disponible para reserva.' });
+    setFeedback({ type: 'info', title: t("Bloque eliminado"), message: t("El bloque se eliminó y ya no está disponible para reserva.") });
   };
 
   // Métricas de la semana actual (independientes de los filtros de la lista, siempre derivadas de datos reales).
@@ -216,7 +231,7 @@ export const DisponibilidadProfesionalScreen: React.FC<DisponibilidadProfesional
       return {
         fecha,
         formattedDate: formatFechaLarga(fecha),
-        badge: fecha === hoy ? 'Hoy' : fecha === maniana ? 'Mañana' : undefined,
+        badge: fecha === hoy ? t("Hoy") : fecha === maniana ? t("Mañana") : undefined,
         totalHoras: (totalMin / 60).toFixed(1),
         blocks: items
       };
@@ -232,14 +247,15 @@ export const DisponibilidadProfesionalScreen: React.FC<DisponibilidadProfesional
         <div>
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#dce9ff] text-[#001c3a] text-[11px] font-bold tracking-wider uppercase mb-2">
             <span className="material-symbols-outlined text-[14px]">calendar_month</span>
-            Agenda del Profesional
+            {t("Agenda del Profesional")}
           </span>
           <h1 className="font-display text-2xl sm:text-3xl font-bold text-[#0d1c2e] tracking-tight">
-            Mi Calendario de Disponibilidad
+            {t("Mi Calendario de Disponibilidad")}
           </h1>
           <p className="text-sm text-[#3e494a] mt-1 max-w-2xl leading-relaxed">
-            Define tus bloques de horario por sede asistencial. El sistema discretiza automáticamente cada
-            bloque en franjas de 30 minutos para que los pacientes puedan reservar consultas contigo.
+            {t(
+              "Define tus bloques de horario por sede asistencial. El sistema discretiza automáticamente cada bloque en franjas de 30 minutos para que los pacientes puedan reservar consultas contigo."
+            )}
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -250,7 +266,7 @@ export const DisponibilidadProfesionalScreen: React.FC<DisponibilidadProfesional
             className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-white border border-[#bdc9ca]/70 hover:bg-[#eff4ff] text-[#0d1c2e] transition-all text-xs font-semibold shadow-xs disabled:opacity-60"
           >
             <span className={`material-symbols-outlined text-[16px] ${refreshing ? 'animate-spin' : ''}`}>sync</span>
-            Refrescar Agenda
+            {t("Refrescar Agenda")}
           </button>
           <button
             type="button"
@@ -258,7 +274,7 @@ export const DisponibilidadProfesionalScreen: React.FC<DisponibilidadProfesional
             className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-white border border-[#bdc9ca]/70 hover:bg-[#eff4ff] text-[#3e494a] transition-all text-xs font-semibold shadow-xs"
           >
             <span className="material-symbols-outlined text-[16px]">print</span>
-            Imprimir
+            {t("Imprimir")}
           </button>
         </div>
       </div>
@@ -288,9 +304,9 @@ export const DisponibilidadProfesionalScreen: React.FC<DisponibilidadProfesional
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white p-4 rounded-xl shadow-xs border border-[#e6eeff] flex items-center justify-between">
           <div className="flex flex-col">
-            <span className="text-[11px] uppercase tracking-wider text-[#6e797a] font-semibold">Bloques Programados</span>
+            <span className="text-[11px] uppercase tracking-wider text-[#6e797a] font-semibold">{t("Bloques Programados")}</span>
             <span className="text-2xl font-bold text-[#0d1c2e] mt-1">{totalBloquesSemana}</span>
-            <span className="text-[11px] text-[#3e494a] mt-0.5">Semana actual, ambas sedes</span>
+            <span className="text-[11px] text-[#3e494a] mt-0.5">{t("Semana actual, ambas sedes")}</span>
           </div>
           <div className="w-11 h-11 rounded-xl bg-[#eff4ff] text-[#006066] flex items-center justify-center shrink-0">
             <span className="material-symbols-outlined text-[22px]">date_range</span>
@@ -298,9 +314,9 @@ export const DisponibilidadProfesionalScreen: React.FC<DisponibilidadProfesional
         </div>
         <div className="bg-white p-4 rounded-xl shadow-xs border border-[#e6eeff] flex items-center justify-between">
           <div className="flex flex-col">
-            <span className="text-[11px] uppercase tracking-wider text-[#6e797a] font-semibold">Horas Ofertadas</span>
+            <span className="text-[11px] uppercase tracking-wider text-[#6e797a] font-semibold">{t("Horas Ofertadas")}</span>
             <span className="text-2xl font-bold text-[#0d1c2e] mt-1">{totalHorasSemana} h</span>
-            <span className="text-[11px] text-[#3e494a] mt-0.5">Semana actual</span>
+            <span className="text-[11px] text-[#3e494a] mt-0.5">{t("Semana actual")}</span>
           </div>
           <div className="w-11 h-11 rounded-xl bg-[#eff4ff] text-[#006066] flex items-center justify-center shrink-0">
             <span className="material-symbols-outlined text-[22px]">schedule</span>
@@ -308,9 +324,9 @@ export const DisponibilidadProfesionalScreen: React.FC<DisponibilidadProfesional
         </div>
         <div className="bg-white p-4 rounded-xl shadow-xs border border-[#e6eeff] flex items-center justify-between">
           <div className="flex flex-col">
-            <span className="text-[11px] uppercase tracking-wider text-[#6e797a] font-semibold">Cupos Estimados</span>
+            <span className="text-[11px] uppercase tracking-wider text-[#6e797a] font-semibold">{t("Cupos Estimados")}</span>
             <span className="text-2xl font-bold text-[#0d1c2e] mt-1">{totalCuposSemana}</span>
-            <span className="text-[11px] text-[#3e494a] mt-0.5">Franjas de 30 min, semana actual</span>
+            <span className="text-[11px] text-[#3e494a] mt-0.5">{t("Franjas de 30 min, semana actual")}</span>
           </div>
           <div className="w-11 h-11 rounded-xl bg-[#eff4ff] text-[#006066] flex items-center justify-center shrink-0">
             <span className="material-symbols-outlined text-[22px]">supervised_user_circle</span>
@@ -321,13 +337,13 @@ export const DisponibilidadProfesionalScreen: React.FC<DisponibilidadProfesional
       {loading ? (
         <div className="bg-white rounded-xl shadow-sm border border-[#e6eeff] p-10 flex flex-col items-center text-center">
           <span className="material-symbols-outlined text-[36px] text-[#0d7a82] animate-spin">progress_activity</span>
-          <p className="text-sm text-[#3e494a] mt-3">Cargando tu calendario de disponibilidad...</p>
+          <p className="text-sm text-[#3e494a] mt-3">{t("Cargando tu calendario de disponibilidad...")}</p>
         </div>
       ) : loadError ? (
         <div className="rounded-xl p-6 bg-[#ffdad6] text-[#93000a] border border-[#ba1a1a]/20 flex items-start gap-4">
           <span className="material-symbols-outlined text-[28px]">wifi_off</span>
           <div>
-            <h3 className="font-bold">Error de Conexión</h3>
+            <h3 className="font-bold">{t("Error de Conexión")}</h3>
             <p className="text-sm mt-1">{loadError}</p>
           </div>
         </div>
@@ -342,8 +358,8 @@ export const DisponibilidadProfesionalScreen: React.FC<DisponibilidadProfesional
                   <span className="material-symbols-outlined text-[22px]">add_circle</span>
                 </div>
                 <div>
-                  <h2 className="font-display font-semibold text-base sm:text-lg text-[#0d1c2e]">Crear Bloque de Horario</h2>
-                  <p className="text-xs text-[#3e494a]">Registra una nueva franja de consulta ambulatoria</p>
+                  <h2 className="font-display font-semibold text-base sm:text-lg text-[#0d1c2e]">{t("Crear Bloque de Horario")}</h2>
+                  <p className="text-xs text-[#3e494a]">{t("Registra una nueva franja de consulta ambulatoria")}</p>
                 </div>
               </div>
 
@@ -358,9 +374,9 @@ export const DisponibilidadProfesionalScreen: React.FC<DisponibilidadProfesional
                 {/* Sede */}
                 <div>
                   <label className="block text-sm font-semibold text-[#0d1c2e] mb-2">
-                    Sede Hospitalaria <span className="text-[#ba1a1a]">*</span>
+                    {t("Sede Hospitalaria")} <span className="text-[#ba1a1a]">*</span>
                   </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5" role="radiogroup" aria-label="Seleccionar sede">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5" role="radiogroup" aria-label={t("Seleccionar sede")}>
                     {([1, 2] as SedeId[]).map((id) => (
                       <button
                         key={id}
@@ -391,7 +407,7 @@ export const DisponibilidadProfesionalScreen: React.FC<DisponibilidadProfesional
                 {/* Fecha */}
                 <div>
                   <label htmlFor="form-fecha" className="block text-sm font-semibold text-[#0d1c2e] mb-1.5">
-                    Fecha de Consulta <span className="text-[#ba1a1a]">*</span>
+                    {t("Fecha de Consulta")} <span className="text-[#ba1a1a]">*</span>
                   </label>
                   <div className="relative flex items-center">
                     <span className="material-symbols-outlined absolute left-3 text-[#6e797a] text-[18px] pointer-events-none">
@@ -406,17 +422,17 @@ export const DisponibilidadProfesionalScreen: React.FC<DisponibilidadProfesional
                       className="w-full pl-9 pr-3.5 py-2.5 bg-[#eff4ff] border border-[#bdc9ca]/60 rounded-lg text-sm text-[#0d1c2e] font-medium focus:outline-none focus:ring-2 focus:ring-[#0d7a82] focus:bg-white transition-all"
                     />
                   </div>
-                  <p className="text-[11px] text-[#6e797a] mt-1.5">No se admiten fechas pasadas (Regla HU-012).</p>
+                  <p className="text-[11px] text-[#6e797a] mt-1.5">{t("No se admiten fechas pasadas (Regla HU-012).")}</p>
                 </div>
 
                 {/* Horario */}
                 <div>
                   <label className="block text-sm font-semibold text-[#0d1c2e] mb-1.5">
-                    Franja Horaria <span className="text-[#ba1a1a]">*</span>
+                    {t("Franja Horaria")} <span className="text-[#ba1a1a]">*</span>
                   </label>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <span className="text-[11px] font-medium text-[#6e797a] block mb-1">Hora Inicio</span>
+                      <span className="text-[11px] font-medium text-[#6e797a] block mb-1">{t("Hora Inicio")}</span>
                       <input
                         type="time"
                         step={1800}
@@ -426,7 +442,7 @@ export const DisponibilidadProfesionalScreen: React.FC<DisponibilidadProfesional
                       />
                     </div>
                     <div>
-                      <span className="text-[11px] font-medium text-[#6e797a] block mb-1">Hora Fin</span>
+                      <span className="text-[11px] font-medium text-[#6e797a] block mb-1">{t("Hora Fin")}</span>
                       <input
                         type="time"
                         step={1800}
@@ -441,7 +457,10 @@ export const DisponibilidadProfesionalScreen: React.FC<DisponibilidadProfesional
                   {(() => {
                     const dur = calcularDuracionMinutos(formHoraInicio, formHoraFin);
                     const valido = dur > 0 && dur % 30 === 0;
-                    const texto = dur <= 0 ? 'Horario no válido' : dur % 30 !== 0 ? 'Debe ser múltiplo de 30 min' : `${(dur / 60).toFixed(1)} h • ${Math.floor(dur / 30)} cupos`;
+                    const texto = dur <= 0 ? t("Horario no válido") : dur % 30 !== 0 ? t("Debe ser múltiplo de 30 min") : t("{v} h • {v2} cupos", {
+                      v: (dur / 60).toFixed(1),
+                      v2: Math.floor(dur / 30)
+                    });
                     return (
                       <div
                         className={`mt-2 p-3 rounded-lg border flex items-center justify-between text-xs ${
@@ -450,7 +469,7 @@ export const DisponibilidadProfesionalScreen: React.FC<DisponibilidadProfesional
                       >
                         <span className="flex items-center gap-1.5 font-medium">
                           <span className="material-symbols-outlined text-[16px]">timelapse</span>
-                          Discretización automática:
+                          {t("Discretización automática:")}
                         </span>
                         <span className="font-semibold">{texto}</span>
                       </div>
@@ -461,8 +480,9 @@ export const DisponibilidadProfesionalScreen: React.FC<DisponibilidadProfesional
                 <div className="p-3 bg-[#eff4ff]/70 rounded-lg border border-[#e6eeff] text-[#3e494a] flex items-start gap-2">
                   <span className="material-symbols-outlined text-[#006066] text-[16px] shrink-0 mt-0.5">policy</span>
                   <p className="text-[11px] leading-relaxed">
-                    <strong>Regla HU-012:</strong> los bloques deben ser continuos en múltiplos exactos de 30
-                    minutos y no pueden solaparse con otro bloque propio.
+                    <strong>{t("Regla HU-012:")}</strong> {t(
+                      "los bloques deben ser continuos en múltiplos exactos de 30 minutos y no pueden solaparse con otro bloque propio."
+                    )}
                   </p>
                 </div>
 
@@ -473,14 +493,14 @@ export const DisponibilidadProfesionalScreen: React.FC<DisponibilidadProfesional
                     className="w-full sm:flex-1 py-3 px-4 rounded-lg bg-[#006066] hover:bg-[#0d7a82] text-white text-sm font-semibold flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     <span className="material-symbols-outlined text-[18px]">event_available</span>
-                    <span>{creating ? 'Publicando...' : 'Guardar y Publicar Bloque'}</span>
+                    <span>{creating ? 'Publicando...' : t("Guardar y Publicar Bloque")}</span>
                   </button>
                   <button
                     type="button"
                     onClick={handleResetForm}
                     className="w-full sm:w-auto py-3 px-4 rounded-lg bg-transparent border border-[#bdc9ca] hover:bg-[#eff4ff] text-[#3e494a] text-sm font-semibold transition-all"
                   >
-                    Limpiar
+                    {t("Limpiar")}
                   </button>
                 </div>
               </form>
@@ -493,8 +513,8 @@ export const DisponibilidadProfesionalScreen: React.FC<DisponibilidadProfesional
             <div className="p-5 sm:p-6 flex flex-col gap-5">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#eff4ff]">
                 <div>
-                  <h2 className="font-display font-semibold text-base sm:text-lg text-[#0d1c2e]">Bloques Programados</h2>
-                  <p className="text-xs text-[#6e797a] mt-0.5">Franjas visibles para reserva de pacientes FCV</p>
+                  <h2 className="font-display font-semibold text-base sm:text-lg text-[#0d1c2e]">{t("Bloques Programados")}</h2>
+                  <p className="text-xs text-[#6e797a] mt-0.5">{t("Franjas visibles para reserva de pacientes FCV")}</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <select
@@ -502,7 +522,7 @@ export const DisponibilidadProfesionalScreen: React.FC<DisponibilidadProfesional
                     onChange={(e) => setSedeFiltro(e.target.value === 'ALL' ? 'ALL' : (Number(e.target.value) as SedeId))}
                     className="px-2.5 py-1.5 rounded-lg bg-[#eff4ff] border border-[#bdc9ca]/60 text-xs font-medium text-[#0d1c2e] focus:outline-none focus:ring-2 focus:ring-[#0d7a82]"
                   >
-                    <option value="ALL">Todas las sedes</option>
+                    <option value="ALL">{t("Todas las sedes")}</option>
                     <option value={1}>{SEDES[1].corto}</option>
                     <option value={2}>{SEDES[2].corto}</option>
                   </select>
@@ -522,7 +542,7 @@ export const DisponibilidadProfesionalScreen: React.FC<DisponibilidadProfesional
                           periodoFiltro === value ? 'bg-white text-[#006066] shadow-xs' : 'text-[#3e494a] hover:text-[#0d1c2e]'
                         }`}
                       >
-                        {label}
+                        {t(label)}
                       </button>
                     ))}
                   </div>
@@ -535,12 +555,14 @@ export const DisponibilidadProfesionalScreen: React.FC<DisponibilidadProfesional
                     <span className="material-symbols-outlined text-[28px]">event_busy</span>
                   </div>
                   <h3 className="font-display font-semibold text-base text-[#0d1c2e]">
-                    {blocks.length === 0 ? 'Aún no tienes bloques de disponibilidad' : 'Sin bloques para este filtro'}
+                    {blocks.length === 0 ? t("Aún no tienes bloques de disponibilidad") : t("Sin bloques para este filtro")}
                   </h3>
                   <p className="text-xs text-[#3e494a] max-w-md mt-1 leading-relaxed">
                     {blocks.length === 0
-                      ? 'Crea tu primer bloque de horario en el panel izquierdo para que los pacientes puedan agendar consultas contigo.'
-                      : 'Cambia el filtro de sede o periodo para ver otros bloques ya creados.'}
+                      ? t(
+                      "Crea tu primer bloque de horario en el panel izquierdo para que los pacientes puedan agendar consultas contigo."
+                    )
+                      : t("Cambia el filtro de sede o periodo para ver otros bloques ya creados.")}
                   </p>
                 </div>
               ) : (
@@ -558,7 +580,7 @@ export const DisponibilidadProfesionalScreen: React.FC<DisponibilidadProfesional
                           )}
                         </div>
                         <span className="text-[11px] text-[#6e797a]">
-                          {grupo.blocks.length} {grupo.blocks.length === 1 ? 'bloque' : 'bloques'} • {grupo.totalHoras} hrs
+                          {t(grupo.blocks.length === 1 ? '{n} bloque • {horas} hrs' : '{n} bloques • {horas} hrs', { n: grupo.blocks.length, horas: grupo.totalHoras })}
                         </span>
                       </div>
 
@@ -580,13 +602,12 @@ export const DisponibilidadProfesionalScreen: React.FC<DisponibilidadProfesional
                                     b.activo ? 'bg-emerald-100 text-emerald-800' : 'bg-[#e6eeff] text-[#6e797a]'
                                   }`}
                                 >
-                                  {b.activo ? 'Activo' : 'Inactivo'}
+                                  {b.activo ? t("Activo") : t("Inactivo")}
                                 </span>
                               </div>
                               <span className="flex items-center gap-1 mt-1 text-[#3e494a] text-xs">
                                 <span className="material-symbols-outlined text-[14px] text-[#6e797a]">schedule</span>
-                                Duración: {(calcularDuracionMinutos(b.horaInicio.slice(0, 5), b.horaFin.slice(0, 5)) / 60).toFixed(1)}h
-                                • {Math.floor(calcularDuracionMinutos(b.horaInicio.slice(0, 5), b.horaFin.slice(0, 5)) / 30)} cupos de 30 min
+                                {t("Duración:")} {(calcularDuracionMinutos(b.horaInicio.slice(0, 5), b.horaFin.slice(0, 5)) / 60).toFixed(1)}{t("h •")} {Math.floor(calcularDuracionMinutos(b.horaInicio.slice(0, 5), b.horaFin.slice(0, 5)) / 30)} {t("cupos de 30 min")}
                               </span>
                             </div>
                           </div>
@@ -595,20 +616,20 @@ export const DisponibilidadProfesionalScreen: React.FC<DisponibilidadProfesional
                             <button
                               type="button"
                               onClick={() => setEditingBlock(b)}
-                              title="Editar horario y sede"
+                              title={t("Editar horario y sede")}
                               className="h-9 px-3 rounded-lg bg-[#eff4ff] hover:bg-[#dce9ff] text-[#0d1c2e] text-xs font-semibold flex items-center gap-1 transition-all"
                             >
                               <span className="material-symbols-outlined text-[16px]">edit</span>
-                              <span>Editar</span>
+                              <span>{t("Editar")}</span>
                             </button>
                             <button
                               type="button"
                               onClick={() => setDeletingBlock(b)}
-                              title="Eliminar bloque de disponibilidad"
+                              title={t("Eliminar bloque de disponibilidad")}
                               className="h-9 px-3 rounded-lg bg-[#ffdad6]/40 hover:bg-[#ffdad6] text-[#ba1a1a] text-xs font-semibold flex items-center gap-1 transition-all"
                             >
                               <span className="material-symbols-outlined text-[16px]">delete</span>
-                              <span>Eliminar</span>
+                              <span>{t("Eliminar")}</span>
                             </button>
                           </div>
                         </article>
@@ -623,8 +644,9 @@ export const DisponibilidadProfesionalScreen: React.FC<DisponibilidadProfesional
       )}
 
       <div className="text-center text-[11px] text-[#6e797a] pt-2">
-        Fundación Cardiovascular de Colombia • Módulo Ambulatorio de Profesionales • Protección de datos
-        conforme a la Ley 1581 de 2012.
+        {t(
+          "Fundación Cardiovascular de Colombia • Módulo Ambulatorio de Profesionales • Protección de datos conforme a la Ley 1581 de 2012."
+        )}
       </div>
 
       <EditAvailabilityBlockModal

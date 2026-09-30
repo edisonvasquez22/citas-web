@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { DocumentType } from '../types';
+import { t } from '../i18n';
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
 const FCV_LOGO_URL =
@@ -69,29 +70,29 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin, onO
     const newErrors: ValidationErrors = {};
 
     if (!formData.nombres.trim() || formData.nombres.trim().length < 2) {
-      newErrors.nombres = 'Ingresa tus nombres completos.';
+      newErrors.nombres = t("Ingresa tus nombres completos.");
     }
     if (!formData.apellidos.trim() || formData.apellidos.trim().length < 2) {
-      newErrors.apellidos = 'Ingresa tus apellidos completos.';
+      newErrors.apellidos = t("Ingresa tus apellidos completos.");
     }
     if (!formData.tipoDocumento) {
-      newErrors.tipoDocumento = 'Selecciona el tipo de documento.';
+      newErrors.tipoDocumento = t("Selecciona el tipo de documento.");
     }
     if (!formData.numeroDocumento.trim() || formData.numeroDocumento.trim().length < 4) {
-      newErrors.numeroDocumento = 'Ingresa un número de documento válido.';
+      newErrors.numeroDocumento = t("Ingresa un número de documento válido.");
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!formData.email.trim() || !emailRegex.test(formData.email.trim())) {
-      newErrors.email = 'Ingresa una dirección de correo válida.';
+      newErrors.email = t("Ingresa una dirección de correo válida.");
     }
     if (!formData.telefono.trim() || formData.telefono.trim().length < 7) {
-      newErrors.telefono = 'Ingresa un teléfono de contacto.';
+      newErrors.telefono = t("Ingresa un teléfono de contacto.");
     }
     if (!formData.password || formData.password.length < 8) {
-      newErrors.password = 'La contraseña debe tener al menos 8 caracteres.';
+      newErrors.password = t("La contraseña debe tener al menos 8 caracteres.");
     }
     if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Las contraseñas no coinciden.';
+      newErrors.confirmPassword = t("Las contraseñas no coinciden.");
     }
 
     setErrors(newErrors);
@@ -103,8 +104,10 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin, onO
     if (!validate()) {
       setAlert({
         type: 'error',
-        title: 'Formulario incompleto',
-        message: 'Por favor corrige los campos señalados en rojo para continuar con tu registro.'
+        title: t("Formulario incompleto"),
+        message: t(
+          "Por favor corrige los campos señalados en rojo para continuar con tu registro."
+        )
       });
       return;
     }
@@ -138,8 +141,8 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin, onO
         setErrors(fieldErrors);
         setAlert({
           type: 'error',
-          title: 'Datos inválidos',
-          message: data.message ?? 'Revisa los campos señalados en rojo.'
+          title: t("Datos inválidos"),
+          message: data.message ?? t("Revisa los campos señalados en rojo.")
         });
         return;
       }
@@ -148,8 +151,8 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin, onO
         const data: { message?: string } = await response.json();
         setAlert({
           type: 'error',
-          title: 'Cuenta ya existente',
-          message: data.message ?? 'Ya existe una cuenta registrada con esos datos.'
+          title: t("Cuenta ya existente"),
+          message: data.message ?? t("Ya existe una cuenta registrada con esos datos.")
         });
         return;
       }
@@ -157,8 +160,8 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin, onO
       if (!response.ok) {
         setAlert({
           type: 'error',
-          title: 'Error de Conexión',
-          message: 'No se pudo completar el registro. Inténtalo de nuevo más tarde.'
+          title: t("Error de Conexión"),
+          message: t("No se pudo completar el registro. Inténtalo de nuevo más tarde.")
         });
         return;
       }
@@ -167,8 +170,10 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin, onO
     } catch {
       setAlert({
         type: 'error',
-        title: 'Error de Conexión',
-        message: 'No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo.'
+        title: t("Error de Conexión"),
+        message: t(
+          "No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo."
+        )
       });
     } finally {
       setIsLoading(false);
@@ -187,7 +192,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin, onO
               <div className="w-14 h-14 rounded-xl bg-[#eff4ff] p-2 flex items-center justify-center shadow-xs border border-[#dce9ff]">
                 <img
                   src={FCV_LOGO_URL}
-                  alt="Logo FCV Citas"
+                  alt={t("Logo FCV Citas")}
                   className="w-full h-full object-contain"
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
@@ -196,20 +201,20 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin, onO
                   }}
                 />
                 <div className="fcv-fallback-logo hidden flex items-center justify-center font-bold text-[#006066] text-xs">
-                  FCV
+                  {t("FCV")}
                 </div>
               </div>
               <div className="flex flex-col">
                 <div className="flex items-center gap-2">
                   <span className="font-display font-bold text-xl text-[#0d1c2e] tracking-tight">
-                    FCV Citas
+                    {t("FCV Citas")}
                   </span>
                   <span className="px-2 py-0.5 rounded-full bg-[#d4e3ff] text-[#001c3a] text-[11px] font-semibold uppercase tracking-wider">
-                    Pacientes
+                    {t("Pacientes")}
                   </span>
                 </div>
                 <p className="text-xs text-[#3e494a] font-medium">
-                  Portal del Paciente • Floridablanca y Bucaramanga
+                  {t("Portal del Paciente • Floridablanca y Bucaramanga")}
                 </p>
               </div>
             </div>
@@ -221,17 +226,19 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin, onO
                 type="button"
               >
                 <span className="material-symbols-outlined text-[16px]">help_outline</span>
-                <span>Soporte</span>
+                <span>{t("Soporte")}</span>
               </button>
             </div>
           </div>
 
           <div className="mb-6">
             <h1 className="font-display font-semibold text-2xl sm:text-[30px] leading-tight text-[#0d1c2e] mb-1.5">
-              Registro de Nuevo Paciente
+              {t("Registro de Nuevo Paciente")}
             </h1>
             <p className="text-sm text-[#3e494a] leading-relaxed">
-              Crea tu cuenta para agendar citas médicas generales, consulta especializada y estudios de laboratorio en nuestros centros médicos.
+              {t(
+                "Crea tu cuenta para agendar citas médicas generales, consulta especializada y estudios de laboratorio en nuestros centros médicos."
+              )}
             </p>
           </div>
 
@@ -252,7 +259,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin, onO
               <button
                 onClick={() => setAlert(null)}
                 className="text-current hover:opacity-75 transition-opacity p-0.5"
-                title="Cerrar notificación"
+                title={t("Cerrar notificación")}
                 type="button"
               >
                 <span className="material-symbols-outlined text-[16px]">close</span>
@@ -266,10 +273,12 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin, onO
                 <span className="material-symbols-outlined text-[36px] text-[#006066]">check_circle</span>
               </div>
               <h2 className="font-display font-bold text-xl sm:text-2xl text-[#0d1c2e] mb-2">
-                ¡Cuenta creada exitosamente!
+                {t("¡Cuenta creada exitosamente!")}
               </h2>
               <p className="text-sm text-[#3e494a] max-w-lg mb-6 leading-relaxed">
-                Tu registro en FCV Citas fue completado. Ya puedes iniciar sesión para agendar tus citas médicas.
+                {t(
+                  "Tu registro en FCV Citas fue completado. Ya puedes iniciar sesión para agendar tus citas médicas."
+                )}
               </p>
               <button
                 onClick={onGoToLogin}
@@ -277,7 +286,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin, onO
                 type="button"
               >
                 <span className="material-symbols-outlined text-[18px]">login</span>
-                <span>Ir a Iniciar Sesión</span>
+                <span>{t("Ir a Iniciar Sesión")}</span>
               </button>
             </div>
           ) : (
@@ -286,7 +295,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin, onO
                 {/* Nombres */}
                 <div className="flex flex-col gap-1">
                   <label htmlFor="nombres" className="text-xs font-semibold text-[#3e494a] flex items-center gap-1">
-                    Nombres <span className="text-[#ba1a1a]">*</span>
+                    {t("Nombres")} <span className="text-[#ba1a1a]">*</span>
                   </label>
                   <div className="relative flex items-center">
                     <span className="material-symbols-outlined text-[18px] text-[#6e797a] absolute left-3 pointer-events-none">
@@ -298,7 +307,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin, onO
                       type="text"
                       value={formData.nombres}
                       onChange={handleChange}
-                      placeholder="Ej. Carlos Andrés"
+                      placeholder={t("Ej. Carlos Andrés")}
                       className={`w-full pl-9 pr-3 py-2 text-sm rounded-lg outline-none transition-all shadow-2xs border ${
                         errors.nombres
                           ? 'border-[#ba1a1a] bg-[#ffdad6]/20 text-[#0d1c2e]'
@@ -318,7 +327,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin, onO
                 {/* Apellidos */}
                 <div className="flex flex-col gap-1">
                   <label htmlFor="apellidos" className="text-xs font-semibold text-[#3e494a] flex items-center gap-1">
-                    Apellidos <span className="text-[#ba1a1a]">*</span>
+                    {t("Apellidos")} <span className="text-[#ba1a1a]">*</span>
                   </label>
                   <div className="relative flex items-center">
                     <span className="material-symbols-outlined text-[18px] text-[#6e797a] absolute left-3 pointer-events-none">
@@ -330,7 +339,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin, onO
                       type="text"
                       value={formData.apellidos}
                       onChange={handleChange}
-                      placeholder="Ej. Rodríguez Gómez"
+                      placeholder={t("Ej. Rodríguez Gómez")}
                       className={`w-full pl-9 pr-3 py-2 text-sm rounded-lg outline-none transition-all shadow-2xs border ${
                         errors.apellidos
                           ? 'border-[#ba1a1a] bg-[#ffdad6]/20 text-[#0d1c2e]'
@@ -350,7 +359,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin, onO
                 {/* Tipo de Documento */}
                 <div className="flex flex-col gap-1">
                   <label htmlFor="tipoDocumento" className="text-xs font-semibold text-[#3e494a] flex items-center gap-1">
-                    Tipo de Documento <span className="text-[#ba1a1a]">*</span>
+                    {t("Tipo de Documento")} <span className="text-[#ba1a1a]">*</span>
                   </label>
                   <div className="relative flex items-center">
                     <span className="material-symbols-outlined text-[18px] text-[#6e797a] absolute left-3 pointer-events-none">
@@ -368,11 +377,11 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin, onO
                       }`}
                       required
                     >
-                      <option value="">Selecciona tipo de documento</option>
-                      <option value="CC">Cédula de ciudadanía (CC)</option>
-                      <option value="CE">Cédula de extranjería (CE)</option>
-                      <option value="TI">Tarjeta de identidad (TI)</option>
-                      <option value="PAS">Pasaporte (PAS)</option>
+                      <option value="">{t("Selecciona tipo de documento")}</option>
+                      <option value="CC">{t("Cédula de ciudadanía (CC)")}</option>
+                      <option value="CE">{t("Cédula de extranjería (CE)")}</option>
+                      <option value="TI">{t("Tarjeta de identidad (TI)")}</option>
+                      <option value="PAS">{t("Pasaporte (PAS)")}</option>
                     </select>
                     <span className="material-symbols-outlined text-[18px] text-[#6e797a] absolute right-3 pointer-events-none">
                       expand_more
@@ -389,7 +398,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin, onO
                 {/* Número de Documento */}
                 <div className="flex flex-col gap-1">
                   <label htmlFor="numeroDocumento" className="text-xs font-semibold text-[#3e494a] flex items-center gap-1">
-                    Número de Documento <span className="text-[#ba1a1a]">*</span>
+                    {t("Número de Documento")} <span className="text-[#ba1a1a]">*</span>
                   </label>
                   <div className="relative flex items-center">
                     <span className="material-symbols-outlined text-[18px] text-[#6e797a] absolute left-3 pointer-events-none">
@@ -401,7 +410,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin, onO
                       type="text"
                       value={formData.numeroDocumento}
                       onChange={handleChange}
-                      placeholder="Ej. 1098765432"
+                      placeholder={t("Ej. 1098765432")}
                       className={`w-full pl-9 pr-3 py-2 text-sm rounded-lg outline-none transition-all shadow-2xs border ${
                         errors.numeroDocumento
                           ? 'border-[#ba1a1a] bg-[#ffdad6]/20 text-[#0d1c2e]'
@@ -421,7 +430,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin, onO
                 {/* Correo Electrónico */}
                 <div className="flex flex-col gap-1">
                   <label htmlFor="email" className="text-xs font-semibold text-[#3e494a] flex items-center gap-1">
-                    Correo Electrónico <span className="text-[#ba1a1a]">*</span>
+                    {t("Correo Electrónico")} <span className="text-[#ba1a1a]">*</span>
                   </label>
                   <div className="relative flex items-center">
                     <span className="material-symbols-outlined text-[18px] text-[#6e797a] absolute left-3 pointer-events-none">
@@ -433,7 +442,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin, onO
                       type="email"
                       value={formData.email}
                       onChange={handleChange}
-                      placeholder="nombre@correo.com"
+                      placeholder={t("nombre@correo.com")}
                       className={`w-full pl-9 pr-3 py-2 text-sm rounded-lg outline-none transition-all shadow-2xs border ${
                         errors.email
                           ? 'border-[#ba1a1a] bg-[#ffdad6]/20 text-[#0d1c2e]'
@@ -453,7 +462,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin, onO
                 {/* Teléfono */}
                 <div className="flex flex-col gap-1">
                   <label htmlFor="telefono" className="text-xs font-semibold text-[#3e494a] flex items-center gap-1">
-                    Teléfono <span className="text-[#ba1a1a]">*</span>
+                    {t("Teléfono")} <span className="text-[#ba1a1a]">*</span>
                   </label>
                   <div className="relative flex items-center">
                     <span className="material-symbols-outlined text-[18px] text-[#6e797a] absolute left-3 pointer-events-none">
@@ -465,7 +474,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin, onO
                       type="tel"
                       value={formData.telefono}
                       onChange={handleChange}
-                      placeholder="Ej. 315 123 4567"
+                      placeholder={t("Ej. 315 123 4567")}
                       className={`w-full pl-9 pr-3 py-2 text-sm rounded-lg outline-none transition-all shadow-2xs border ${
                         errors.telefono
                           ? 'border-[#ba1a1a] bg-[#ffdad6]/20 text-[#0d1c2e]'
@@ -486,9 +495,9 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin, onO
                 <div className="flex flex-col gap-1">
                   <div className="flex justify-between items-center">
                     <label htmlFor="password" className="text-xs font-semibold text-[#3e494a] flex items-center gap-1">
-                      Contraseña <span className="text-[#ba1a1a]">*</span>
+                      {t("Contraseña")} <span className="text-[#ba1a1a]">*</span>
                     </label>
-                    <span className="text-[11px] text-[#6e797a]">Mínimo 8 caracteres</span>
+                    <span className="text-[11px] text-[#6e797a]">{t("Mínimo 8 caracteres")}</span>
                   </div>
                   <div className="relative flex items-center">
                     <span className="material-symbols-outlined text-[18px] text-[#6e797a] absolute left-3 pointer-events-none">
@@ -512,7 +521,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin, onO
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 text-[#6e797a] hover:text-[#0d1c2e] transition-colors p-0.5 cursor-pointer"
-                      aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                      aria-label={showPassword ? t("Ocultar contraseña") : t("Mostrar contraseña")}
                     >
                       <span className="material-symbols-outlined text-[18px]">
                         {showPassword ? 'visibility_off' : 'visibility'}
@@ -530,7 +539,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin, onO
                 {/* Confirmar Contraseña */}
                 <div className="flex flex-col gap-1">
                   <label htmlFor="confirmPassword" className="text-xs font-semibold text-[#3e494a] flex items-center gap-1">
-                    Confirmar Contraseña <span className="text-[#ba1a1a]">*</span>
+                    {t("Confirmar Contraseña")} <span className="text-[#ba1a1a]">*</span>
                   </label>
                   <div className="relative flex items-center">
                     <span className="material-symbols-outlined text-[18px] text-[#6e797a] absolute left-3 pointer-events-none">
@@ -554,7 +563,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin, onO
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       className="absolute right-3 text-[#6e797a] hover:text-[#0d1c2e] transition-colors p-0.5 cursor-pointer"
-                      aria-label={showConfirmPassword ? 'Ocultar confirmación' : 'Mostrar confirmación'}
+                      aria-label={showConfirmPassword ? t("Ocultar confirmación") : t("Mostrar confirmación")}
                     >
                       <span className="material-symbols-outlined text-[18px]">
                         {showConfirmPassword ? 'visibility_off' : 'visibility'}
@@ -574,7 +583,9 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin, onO
               <div className="p-3.5 bg-[#eff4ff] rounded-lg border border-[#dce9ff] flex items-start gap-2.5">
                 <span className="material-symbols-outlined text-[20px] text-[#006066] shrink-0 mt-0.5">shield</span>
                 <p className="text-xs text-[#3e494a] leading-relaxed">
-                  Al registrarte aceptas el tratamiento de tus datos para gestión de citas médicas ambulatorias, conforme a la Ley 1581 de 2012 de Protección de Datos Personales de Colombia. Este es un laboratorio de formación: los datos son ficticios.
+                  {t(
+                    "Al registrarte aceptas el tratamiento de tus datos para gestión de citas médicas ambulatorias, conforme a la Ley 1581 de 2012 de Protección de Datos Personales de Colombia. Este es un laboratorio de formación: los datos son ficticios."
+                  )}
                 </p>
               </div>
 
@@ -593,21 +604,21 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin, onO
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
-                      <span>Creando cuenta...</span>
+                      <span>{t("Creando cuenta...")}</span>
                     </>
                   ) : (
-                    <span>Crear Cuenta de Paciente</span>
+                    <span>{t("Crear Cuenta de Paciente")}</span>
                   )}
                 </button>
 
                 <div className="flex items-center justify-center gap-1.5 pt-2 text-center text-sm text-[#3e494a]">
-                  <span>¿Ya tienes una cuenta registrada?</span>
+                  <span>{t("¿Ya tienes una cuenta registrada?")}</span>
                   <button
                     type="button"
                     onClick={onGoToLogin}
                     className="font-semibold text-[#006066] hover:text-[#004f55] hover:underline transition-colors cursor-pointer"
                   >
-                    Inicia sesión aquí
+                    {t("Inicia sesión aquí")}
                   </button>
                 </div>
               </div>
@@ -618,16 +629,18 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin, onO
         <div className="bg-[#eff4ff] border-t border-[#dce9ff] px-6 py-3 flex flex-col md:flex-row items-center justify-between gap-2">
           <div className="flex items-center gap-1.5 text-xs text-[#3e494a]">
             <span className="material-symbols-outlined text-[16px] text-[#005f6f]">lock</span>
-            <span>Conexión segura TLS 256-bit</span>
+            <span>{t("Conexión segura TLS 256-bit")}</span>
           </div>
 
           <p className="text-[11px] text-[#3e494a] text-center">
-            FCV Citas • Floridablanca y Bucaramanga • Protección de datos personales Ley 1581 de 2012
+            {t(
+              "FCV Citas • Floridablanca y Bucaramanga • Protección de datos personales Ley 1581 de 2012"
+            )}
           </p>
 
           <div className="flex items-center gap-1.5 text-xs text-[#3e494a]">
             <span className="material-symbols-outlined text-[16px] text-[#436088]">verified_user</span>
-            <span>Certificado SSL FCV</span>
+            <span>{t("Certificado SSL FCV")}</span>
           </div>
         </div>
       </div>

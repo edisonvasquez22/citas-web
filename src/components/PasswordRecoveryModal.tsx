@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { API_URL } from '../api/session';
 import { mensajeDeError } from '../api/errors';
+import { t } from '../i18n';
 
 interface PasswordRecoveryModalProps {
   isOpen: boolean;
@@ -40,7 +41,7 @@ export const PasswordRecoveryModal: React.FC<PasswordRecoveryModalProps> = ({ is
     e.preventDefault();
     setError(null);
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      setError('Ingresa un correo electrónico válido.');
+      setError(t("Ingresa un correo electrónico válido."));
       return;
     }
     setCargando(true);
@@ -51,14 +52,14 @@ export const PasswordRecoveryModal: React.FC<PasswordRecoveryModalProps> = ({ is
         body: JSON.stringify({ email: email.trim() })
       });
       if (!resp.ok) {
-        setError(await mensajeDeError(resp, 'No se pudo solicitar la recuperación.'));
+        setError(await mensajeDeError(resp, t("No se pudo solicitar la recuperación.")));
         return;
       }
       const data: { message: string } = await resp.json();
       setInfo(data.message);
       setPaso('confirmar');
     } catch {
-      setError('No se pudo contactar al servidor. Inténtalo de nuevo más tarde.');
+      setError(t("No se pudo contactar al servidor. Inténtalo de nuevo más tarde."));
     } finally {
       setCargando(false);
     }
@@ -68,15 +69,15 @@ export const PasswordRecoveryModal: React.FC<PasswordRecoveryModalProps> = ({ is
     e.preventDefault();
     setError(null);
     if (!token.trim()) {
-      setError('Ingresa el token de recuperación.');
+      setError(t("Ingresa el token de recuperación."));
       return;
     }
     if (nuevaPassword.length < 8) {
-      setError('La nueva contraseña debe tener al menos 8 caracteres.');
+      setError(t("La nueva contraseña debe tener al menos 8 caracteres."));
       return;
     }
     if (nuevaPassword !== confirmacion) {
-      setError('Las contraseñas no coinciden.');
+      setError(t("Las contraseñas no coinciden."));
       return;
     }
     setCargando(true);
@@ -87,12 +88,12 @@ export const PasswordRecoveryModal: React.FC<PasswordRecoveryModalProps> = ({ is
         body: JSON.stringify({ token: token.trim(), nuevaPassword })
       });
       if (!resp.ok) {
-        setError(await mensajeDeError(resp, 'El token no es válido o ya expiró.'));
+        setError(await mensajeDeError(resp, t("El token no es válido o ya expiró.")));
         return;
       }
       setPaso('listo');
     } catch {
-      setError('No se pudo contactar al servidor. Inténtalo de nuevo más tarde.');
+      setError(t("No se pudo contactar al servidor. Inténtalo de nuevo más tarde."));
     } finally {
       setCargando(false);
     }
@@ -118,14 +119,14 @@ export const PasswordRecoveryModal: React.FC<PasswordRecoveryModalProps> = ({ is
             className="text-[#6e797a] hover:text-[#0d1c2e] p-1 rounded-md hover:bg-[#eff4ff]"
             onClick={cerrar}
             type="button"
-            aria-label="Cerrar"
+            aria-label={t("Cerrar")}
           >
             <span className="material-symbols-outlined text-[20px]">close</span>
           </button>
         </div>
 
         <h3 id="recovery-title" className="font-display font-semibold text-[18px] text-[#0d1c2e]">
-          Restablecer Contraseña
+          {t("Restablecer Contraseña")}
         </h3>
 
         {error && (
@@ -138,10 +139,10 @@ export const PasswordRecoveryModal: React.FC<PasswordRecoveryModalProps> = ({ is
         {paso === 'solicitar' && (
           <form onSubmit={solicitar} className="mt-2 space-y-3" noValidate>
             <p className="text-[13px] text-[#3e494a] leading-relaxed">
-              Ingresa el correo de tu cuenta y generaremos un token de recuperación.
+              {t("Ingresa el correo de tu cuenta y generaremos un token de recuperación.")}
             </p>
             <label className="block text-[12px] font-semibold text-[#3e494a]">
-              Correo electrónico
+              {t("Correo electrónico")}
               <input
                 type="email"
                 value={email}
@@ -156,14 +157,14 @@ export const PasswordRecoveryModal: React.FC<PasswordRecoveryModalProps> = ({ is
               disabled={cargando}
               className="w-full py-2 px-3 bg-[#006066] hover:bg-[#0d7a82] text-white text-[13px] font-semibold rounded-lg transition-colors disabled:opacity-60"
             >
-              {cargando ? 'Enviando…' : 'Solicitar token'}
+              {cargando ? 'Enviando…' : t("Solicitar token")}
             </button>
             <button
               type="button"
               onClick={() => setPaso('confirmar')}
               className="w-full text-[12px] text-[#006066] hover:underline"
             >
-              Ya tengo un token
+              {t("Ya tengo un token")}
             </button>
           </form>
         )}
@@ -172,14 +173,16 @@ export const PasswordRecoveryModal: React.FC<PasswordRecoveryModalProps> = ({ is
           <form onSubmit={confirmar} className="mt-2 space-y-3" noValidate>
             {info && <p className="text-[12px] text-[#005f6f] bg-[#00798e]/10 rounded-lg p-2.5">{info}</p>}
             <p className="text-[12px] text-[#6e797a] leading-relaxed">
-              En este laboratorio no se envía correo: el token queda en el log del servidor de citas-api. Es válido por 30 minutos y solo sirve una vez.
+              {t(
+                "En este laboratorio no se envía correo: el token queda en el log del servidor de citas-api. Es válido por 30 minutos y solo sirve una vez."
+              )}
             </p>
             <label className="block text-[12px] font-semibold text-[#3e494a]">
-              Token de recuperación
+              {t("Token de recuperación")}
               <input value={token} onChange={(e) => setToken(e.target.value)} className={`${inputClass} mt-1 font-mono`} />
             </label>
             <label className="block text-[12px] font-semibold text-[#3e494a]">
-              Nueva contraseña
+              {t("Nueva contraseña")}
               <input
                 type="password"
                 value={nuevaPassword}
@@ -189,7 +192,7 @@ export const PasswordRecoveryModal: React.FC<PasswordRecoveryModalProps> = ({ is
               />
             </label>
             <label className="block text-[12px] font-semibold text-[#3e494a]">
-              Confirmar contraseña
+              {t("Confirmar contraseña")}
               <input
                 type="password"
                 value={confirmacion}
@@ -203,7 +206,7 @@ export const PasswordRecoveryModal: React.FC<PasswordRecoveryModalProps> = ({ is
               disabled={cargando}
               className="w-full py-2 px-3 bg-[#006066] hover:bg-[#0d7a82] text-white text-[13px] font-semibold rounded-lg transition-colors disabled:opacity-60"
             >
-              {cargando ? 'Guardando…' : 'Cambiar contraseña'}
+              {cargando ? 'Guardando…' : t("Cambiar contraseña")}
             </button>
           </form>
         )}
@@ -212,14 +215,16 @@ export const PasswordRecoveryModal: React.FC<PasswordRecoveryModalProps> = ({ is
           <div className="mt-3 space-y-3">
             <p className="text-[13px] text-[#005f6f] bg-[#00798e]/10 rounded-lg p-3 flex gap-1.5">
               <span className="material-symbols-outlined text-[18px]">check_circle</span>
-              Tu contraseña fue actualizada. Ya puedes iniciar sesión con la nueva contraseña.
+              {t(
+                "Tu contraseña fue actualizada. Ya puedes iniciar sesión con la nueva contraseña."
+              )}
             </p>
             <button
               type="button"
               onClick={cerrar}
               className="w-full py-2 px-3 bg-[#006066] hover:bg-[#0d7a82] text-white text-[13px] font-semibold rounded-lg"
             >
-              Volver al inicio de sesión
+              {t("Volver al inicio de sesión")}
             </button>
           </div>
         )}

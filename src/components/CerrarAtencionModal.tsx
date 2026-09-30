@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ApiErrorBody, CierreResponse, CitaAgendaApi, UserSession } from '../types';
 import { API_URL, apiFetch } from '../api/session';
+import { t } from '../i18n';
 
 
 interface CerrarAtencionModalProps {
@@ -36,18 +37,22 @@ export const CerrarAtencionModal: React.FC<CerrarAtencionModalProps> = ({
 
       if (resp.status === 400 || resp.status === 404) {
         const err: ApiErrorBody = await resp.json();
-        setError(err.message || 'No se pudo registrar el cierre de esta cita.');
+        setError(err.message || t("No se pudo registrar el cierre de esta cita."));
         return;
       }
       if (!resp.ok) {
-        setError('No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo.');
+        setError(t(
+          "No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo."
+        ));
         return;
       }
 
       const resultado: CierreResponse = await resp.json();
       onCerrada(resultado);
     } catch {
-      setError('No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo.');
+      setError(t(
+        "No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo."
+      ));
     } finally {
       setEnviando(false);
     }
@@ -63,9 +68,9 @@ export const CerrarAtencionModal: React.FC<CerrarAtencionModalProps> = ({
             </div>
             <div>
               <h3 className="font-display font-semibold text-lg text-[#0d1c2e]">
-                {esCompletar ? 'Confirmar Cierre de Atención' : 'Registrar Inasistencia'}
+                {esCompletar ? t("Confirmar Cierre de Atención") : t("Registrar Inasistencia")}
               </h3>
-              <p className="text-xs text-[#3e494a] font-mono">Cita #{cita.citaId}</p>
+              <p className="text-xs text-[#3e494a] font-mono">{t("Cita #")}{cita.citaId}</p>
             </div>
           </div>
           <button type="button" onClick={onClose} className="p-1 rounded-full hover:bg-[#eff4ff] text-[#6e797a] hover:text-[#0d1c2e] transition-colors">
@@ -76,23 +81,23 @@ export const CerrarAtencionModal: React.FC<CerrarAtencionModalProps> = ({
         <div className="mt-4 flex flex-col gap-4">
           <div className="bg-[#eff4ff] p-3 rounded-lg text-xs text-[#3e494a] flex flex-col gap-1">
             <div className="flex justify-between items-center">
-              <span className="font-semibold text-[#0d1c2e]">Especialidad:</span>
+              <span className="font-semibold text-[#0d1c2e]">{t("Especialidad:")}</span>
               <span>{resumen.especialidadNombre}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="font-semibold text-[#0d1c2e]">Sede:</span>
+              <span className="font-semibold text-[#0d1c2e]">{t("Sede:")}</span>
               <span>{resumen.sedeNombre}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="font-semibold text-[#0d1c2e]">Horario:</span>
+              <span className="font-semibold text-[#0d1c2e]">{t("Horario:")}</span>
               <span className="font-mono">{cita.inicio.replace('T', ' ').slice(0, 16)}</span>
             </div>
           </div>
 
           <p className="text-sm text-[#0d1c2e]">
             {esCompletar
-              ? '¿Confirmas que la atención de esta cita se realizó?'
-              : '¿Confirmas que el paciente no se presentó a esta cita?'}
+              ? t("¿Confirmas que la atención de esta cita se realizó?")
+              : t("¿Confirmas que el paciente no se presentó a esta cita?")}
           </p>
 
           {error && (
@@ -109,7 +114,7 @@ export const CerrarAtencionModal: React.FC<CerrarAtencionModalProps> = ({
               disabled={enviando}
               className="px-4 py-2 rounded-lg bg-[#eff4ff] text-[#3e494a] hover:bg-[#e6eeff] text-xs font-semibold transition-colors disabled:opacity-50"
             >
-              Cancelar
+              {t("Cancelar")}
             </button>
             <button
               type="button"
@@ -120,7 +125,7 @@ export const CerrarAtencionModal: React.FC<CerrarAtencionModalProps> = ({
               }`}
             >
               <span className="material-symbols-outlined text-[16px]">{esCompletar ? 'check' : 'person_off'}</span>
-              {enviando ? 'Enviando...' : esCompletar ? 'Registrar Completada' : 'Confirmar Inasistencia'}
+              {enviando ? 'Enviando...' : esCompletar ? t("Registrar Completada") : t("Confirmar Inasistencia")}
             </button>
           </div>
         </div>

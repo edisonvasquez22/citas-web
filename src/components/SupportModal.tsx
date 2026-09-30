@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
+import { t } from '../i18n';
 
 interface SupportModalProps {
   isOpen: boolean;
   onClose: () => void;
-  language: 'ES' | 'EN';
 }
 
-export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose, language }) => {
+export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState<'contact' | 'faq'>('contact');
 
   if (!isOpen) return null;
@@ -29,10 +29,10 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose, lan
             </div>
             <div>
               <h3 className="font-display font-semibold text-[18px] text-[#0d1c2e]">
-                {language === 'ES' ? 'Centro de Soporte Institucional' : 'Institutional Support Center'}
+                {t("Centro de Soporte Institucional")}
               </h3>
               <p className="text-[12px] text-[#3e494a]">
-                {language === 'ES' ? 'Fundación Cardiovascular • Floridablanca' : 'Cardiovascular Foundation • Floridablanca'}
+                {t("Fundación Cardiovascular • Floridablanca")}
               </p>
             </div>
           </div>
@@ -53,7 +53,7 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose, lan
               activeTab === 'contact' ? 'bg-white text-[#006066] shadow-xs font-semibold' : 'text-[#3e494a]'
             }`}
           >
-            {language === 'ES' ? 'Canales de Contacto' : 'Direct Channels'}
+            {t("Canales de Contacto")}
           </button>
           <button
             onClick={() => setActiveTab('faq')}
@@ -61,7 +61,7 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose, lan
               activeTab === 'faq' ? 'bg-white text-[#006066] shadow-xs font-semibold' : 'text-[#3e494a]'
             }`}
           >
-            {language === 'ES' ? 'Preguntas Frecuentes' : 'FAQs'}
+            {t("Preguntas Frecuentes")}
           </button>
         </div>
 
@@ -70,26 +70,28 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose, lan
             <div className="p-3 rounded-lg bg-[#f8f9ff] border border-[#e6eeff] flex items-start gap-3">
               <span className="material-symbols-outlined text-[20px] text-[#006066] mt-0.5">call</span>
               <div>
-                <p className="font-semibold text-[#0d1c2e]">{language === 'ES' ? 'Mesa de Ayuda de Citas' : 'Appointments Help Desk'}</p>
-                <p className="text-[#3e494a]">+57 (607) 639-6780 ext. 4200 / 4210</p>
-                <p className="text-[11px] text-[#6e797a]">{language === 'ES' ? 'Lunes a Viernes: 06:00 - 20:00 | Sábados: 07:00 - 13:00' : 'Mon - Fri: 06:00 - 20:00'}</p>
+                <p className="font-semibold text-[#0d1c2e]">{t("Mesa de Ayuda de Citas")}</p>
+                <p className="text-[#3e494a]">{t("+57 (607) 639-6780 ext. 4200 / 4210")}</p>
+                <p className="text-[11px] text-[#6e797a]">{t("Lunes a Viernes: 06:00 - 20:00 | Sábados: 07:00 - 13:00")}</p>
               </div>
             </div>
 
             <div className="p-3 rounded-lg bg-[#f8f9ff] border border-[#e6eeff] flex items-start gap-3">
               <span className="material-symbols-outlined text-[20px] text-[#006066] mt-0.5">mail</span>
               <div>
-                <p className="font-semibold text-[#0d1c2e]">{language === 'ES' ? 'Correo Electrónico Oficial' : 'Official Support Email'}</p>
-                <p className="text-[#006066] font-medium">soporte.citas@fcv.org</p>
-                <p className="text-[11px] text-[#6e797a]">{language === 'ES' ? 'Respuesta prioritaria en menos de 2 horas hábiles' : 'Priority response under 2 business hours'}</p>
+                <p className="font-semibold text-[#0d1c2e]">{t("Correo Electrónico Oficial")}</p>
+                <p className="text-[#006066] font-medium">{t("soporte.citas@fcv.org")}</p>
+                <p className="text-[11px] text-[#6e797a]">{t("Respuesta prioritaria en menos de 2 horas hábiles")}</p>
               </div>
             </div>
 
             <div className="p-3 rounded-lg bg-[#f8f9ff] border border-[#e6eeff] flex items-start gap-3">
               <span className="material-symbols-outlined text-[20px] text-[#006066] mt-0.5">location_on</span>
               <div>
-                <p className="font-semibold text-[#0d1c2e]">{language === 'ES' ? 'Ubicación Presencial' : 'Physical Location'}</p>
-                <p className="text-[#3e494a]">Torre de Docencia e Investigación Médica, Piso 4, Laboratorios FCV. Floridablanca, Santander.</p>
+                <p className="font-semibold text-[#0d1c2e]">{t("Ubicación Presencial")}</p>
+                <p className="text-[#3e494a]">{t(
+                  "Torre de Docencia e Investigación Médica, Piso 4, Laboratorios FCV. Floridablanca, Santander."
+                )}</p>
               </div>
             </div>
           </div>
@@ -97,22 +99,18 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose, lan
           <div className="space-y-2.5 text-[13px] max-h-[260px] overflow-y-auto pr-1">
             <div className="p-2.5 rounded-lg bg-[#f8f9ff] border border-[#e6eeff]">
               <p className="font-semibold text-[#0d1c2e] mb-1">
-                {language === 'ES' ? '¿Cómo creo mi cuenta de paciente?' : 'How do I create my patient account?'}
+                {t("¿Cómo creo mi cuenta de paciente?")}
               </p>
               <p className="text-[#3e494a] text-[12px]">
-                {language === 'ES'
-                  ? 'Desde la pantalla de inicio de sesión, usa el enlace "Regístrate aquí" e ingresa tus datos personales, documento y contraseña.'
-                  : 'From the login screen, use the "Sign up" link and enter your personal details, ID and password.'}
+                {t("Desde la pantalla de inicio de sesión, usa el enlace \"Regístrate aquí\" e ingresa tus datos personales, documento y contraseña.")}
               </p>
             </div>
             <div className="p-2.5 rounded-lg bg-[#f8f9ff] border border-[#e6eeff]">
               <p className="font-semibold text-[#0d1c2e] mb-1">
-                {language === 'ES' ? '¿Olvidé mi contraseña, qué hago?' : 'I forgot my password, what do I do?'}
+                {t("¿Olvidé mi contraseña, qué hago?")}
               </p>
               <p className="text-[#3e494a] text-[12px]">
-                {language === 'ES'
-                  ? 'La recuperación de contraseña se habilitará en una próxima etapa. Mientras tanto, contacta a soporte para asistencia.'
-                  : 'Password recovery will be enabled in a future stage. In the meantime, contact support for help.'}
+                {t("En la pantalla de inicio de sesión usa \"¿Olvidaste tu contraseña?\": solicitas un token con tu correo y luego defines una contraseña nueva.")}
               </p>
             </div>
           </div>
@@ -123,7 +121,7 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose, lan
           className="mt-5 w-full py-2.5 bg-[#006066] hover:bg-[#0d7a82] text-white text-[14px] font-semibold rounded-lg transition-colors cursor-pointer"
           type="button"
         >
-          {language === 'ES' ? 'Cerrar' : 'Close'}
+          {t("Cerrar")}
         </button>
       </div>
     </div>

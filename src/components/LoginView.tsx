@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { UserSession } from '../types';
 import { decodeRolesFromAccessToken } from '../utils/jwt';
+import { t } from '../i18n';
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
 
@@ -40,9 +41,9 @@ export const LoginView: React.FC<LoginViewProps> = ({
   const handleEmailBlur = () => {
     const cleanEmail = email.trim();
     if (!cleanEmail) {
-      setEmailError('El correo electrónico es obligatorio.');
+      setEmailError(t("El correo electrónico es obligatorio."));
     } else if (!validateEmail(cleanEmail)) {
-      setEmailError('Ingresa un formato de correo electrónico válido.');
+      setEmailError(t("Ingresa un formato de correo electrónico válido."));
     } else {
       setEmailError(null);
     }
@@ -50,7 +51,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
 
   const handlePasswordBlur = () => {
     if (!password) {
-      setPasswordError('La contraseña es obligatoria para acceder.');
+      setPasswordError(t("La contraseña es obligatoria para acceder."));
     } else {
       setPasswordError(null);
     }
@@ -64,17 +65,17 @@ export const LoginView: React.FC<LoginViewProps> = ({
     let hasError = false;
 
     if (!cleanEmail) {
-      setEmailError('El correo electrónico es obligatorio.');
+      setEmailError(t("El correo electrónico es obligatorio."));
       hasError = true;
     } else if (!validateEmail(cleanEmail)) {
-      setEmailError('Ingresa un formato de correo electrónico válido.');
+      setEmailError(t("Ingresa un formato de correo electrónico válido."));
       hasError = true;
     } else {
       setEmailError(null);
     }
 
     if (!password) {
-      setPasswordError('La contraseña es obligatoria para acceder.');
+      setPasswordError(t("La contraseña es obligatoria para acceder."));
       hasError = true;
     } else {
       setPasswordError(null);
@@ -94,8 +95,8 @@ export const LoginView: React.FC<LoginViewProps> = ({
       if (response.status === 401) {
         setAlertInfo({
           type: 'error',
-          title: 'Acceso Denegado',
-          message: 'Email o contraseña incorrectos. Verifica tus credenciales.'
+          title: t("Acceso Denegado"),
+          message: t("Email o contraseña incorrectos. Verifica tus credenciales.")
         });
         return;
       }
@@ -103,8 +104,10 @@ export const LoginView: React.FC<LoginViewProps> = ({
       if (!response.ok) {
         setAlertInfo({
           type: 'network',
-          title: 'Error de Conexión',
-          message: 'Error de conexión con el servidor institucional. Inténtalo de nuevo más tarde.'
+          title: t("Error de Conexión"),
+          message: t(
+            "Error de conexión con el servidor institucional. Inténtalo de nuevo más tarde."
+          )
         });
         return;
       }
@@ -121,8 +124,10 @@ export const LoginView: React.FC<LoginViewProps> = ({
     } catch {
       setAlertInfo({
         type: 'network',
-        title: 'Error de Conexión',
-        message: 'No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo.'
+        title: t("Error de Conexión"),
+        message: t(
+          "No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo."
+        )
       });
     } finally {
       setIsLoading(false);
@@ -144,7 +149,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
                 {!imgError ? (
                   <img
                     src="https://lh3.googleusercontent.com/aida/AEtjO1WaNRoTlHr2mSNpI2htqFwuJiwQpjwmSd9t7OiAOkKEuIt6oHxiRSSlCrmn6dqriqdjS-dq9noh5k2KSb1p2qpiuqS3_X0RxdCSgoeK5VM9zwIGuO3vJEGT1d-I97tmy_nkP7RxZH8lEWkSdmQXunpNw66roHUDCshm52hLDqpvOJPeQMt-wk2mcVh36vAPjXCl-8AJdy-OsAJgw-_xaSPwKeIZVg9kJP-O6n-4QQRz0kGFPzHtiv40JdkN"
-                    alt="FCV Citas Logo"
+                    alt={t("FCV Citas Logo")}
                     className="w-full h-full object-contain"
                     onError={() => setImgError(true)}
                   />
@@ -156,13 +161,13 @@ export const LoginView: React.FC<LoginViewProps> = ({
               </div>
 
               <span className="text-[11px] font-semibold text-[#006066] tracking-wider uppercase mb-1">
-                LABORATORIO FCV • DATOS FICTICIOS
+                {t("LABORATORIO FCV • DATOS FICTICIOS")}
               </span>
               <h1 className="font-display font-semibold text-[22px] sm:text-[24px] text-[#0d1c2e] tracking-tight">
-                Iniciar Sesión
+                {t("Iniciar Sesión")}
               </h1>
               <p className="text-[13px] text-[#3e494a] mt-1 max-w-[320px] leading-relaxed">
-                Accede a tu cuenta para gestionar tus citas médicas en FCV
+                {t("Accede a tu cuenta para gestionar tus citas médicas en FCV")}
               </p>
             </div>
 
@@ -200,7 +205,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
               {/* Email */}
               <div className="space-y-1.5">
                 <label className="block text-[13px] font-medium text-[#0d1c2e]" htmlFor="login-email">
-                  Correo electrónico
+                  {t("Correo electrónico")}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#6e797a]">
@@ -216,7 +221,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
                       if (emailError) setEmailError(null);
                     }}
                     onBlur={handleEmailBlur}
-                    placeholder="nombre@correo.com"
+                    placeholder={t("nombre@correo.com")}
                     className={`w-full pl-9 pr-3 py-2.5 bg-white text-[#0d1c2e] text-[14px] rounded-lg border shadow-xs placeholder:text-[#6e797a] focus:outline-none transition-colors ${
                       emailError
                         ? 'border-[#ba1a1a] focus:border-[#ba1a1a] focus:ring-1 focus:ring-[#ba1a1a]'
@@ -236,14 +241,14 @@ export const LoginView: React.FC<LoginViewProps> = ({
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <label className="block text-[13px] font-medium text-[#0d1c2e]" htmlFor="login-password">
-                    Contraseña
+                    {t("Contraseña")}
                   </label>
                   <button
                     type="button"
                     onClick={onOpenRecovery}
                     className="text-[12px] text-[#006066] hover:underline font-medium focus:outline-none"
                   >
-                    ¿Olvidaste tu contraseña?
+                    {t("¿Olvidaste tu contraseña?")}
                   </button>
                 </div>
                 <div className="relative">
@@ -271,7 +276,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#6e797a] hover:text-[#0d1c2e] focus:outline-none"
-                    aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                    aria-label={showPassword ? t("Ocultar contraseña") : t("Mostrar contraseña")}
                   >
                     <span className="material-symbols-outlined text-[18px]">
                       {showPassword ? 'visibility_off' : 'visibility'}
@@ -295,11 +300,11 @@ export const LoginView: React.FC<LoginViewProps> = ({
                     onChange={(e) => setRememberMe(e.target.checked)}
                     className="w-4 h-4 rounded text-[#006066] border-[#6e797a] focus:ring-0 cursor-pointer accent-[#006066]"
                   />
-                  <span className="text-[12px] text-[#3e494a]">Recordar sesión institucional</span>
+                  <span className="text-[12px] text-[#3e494a]">{t("Recordar sesión institucional")}</span>
                 </label>
                 <div className="flex items-center gap-1 text-[#3e494a] text-[11px]">
                   <span className="material-symbols-outlined text-[14px] text-[#005f6f]">shield</span>
-                  <span>TLS 256-bit</span>
+                  <span>{t("TLS 256-bit")}</span>
                 </div>
               </div>
 
@@ -316,10 +321,10 @@ export const LoginView: React.FC<LoginViewProps> = ({
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    <span>Verificando credenciales...</span>
+                    <span>{t("Verificando credenciales...")}</span>
                   </>
                 ) : (
-                  <span>Iniciar Sesión</span>
+                  <span>{t("Iniciar Sesión")}</span>
                 )}
               </button>
             </form>
@@ -327,18 +332,18 @@ export const LoginView: React.FC<LoginViewProps> = ({
             {/* Institutional Quick Access Footer inside card */}
             <div className="mt-6 pt-4 bg-[#eff4ff] -mx-6 -mb-6 sm:-mx-7 sm:-mb-7 p-4 text-center rounded-b-xl flex flex-col items-center gap-1 border-t border-[#dce9ff]/60">
               <p className="text-[12px] text-[#3e494a]">
-                ¿No tienes cuenta institucional?{' '}
+                {t("¿No tienes cuenta institucional?")}{' '}
                 <button
                   type="button"
                   onClick={onOpenRegister}
                   className="text-[#006066] hover:underline font-semibold focus:outline-none cursor-pointer"
                 >
-                  Regístrate aquí
+                  {t("Regístrate aquí")}
                 </button>
               </p>
               <div className="flex items-center gap-1.5 text-[11px] text-[#3e494a] mt-0.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#0d7a82]"></span>
-                <span>Acceso para pacientes registrados en FCV</span>
+                <span>{t("Acceso para pacientes registrados en FCV")}</span>
               </div>
             </div>
           </div>
@@ -348,12 +353,12 @@ export const LoginView: React.FC<LoginViewProps> = ({
         <div className="mt-4 text-center flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[11px] text-[#3e494a]">
           <span className="flex items-center gap-1">
             <span className="material-symbols-outlined text-[14px]">verified_user</span>
-            ISO/IEC 27001 Salud
+            {t("ISO/IEC 27001 Salud")}
           </span>
           <span>•</span>
           <span className="flex items-center gap-1">
             <span className="material-symbols-outlined text-[14px]">dns</span>
-            Servidor Seguro Floridablanca
+            {t("Servidor Seguro Floridablanca")}
           </span>
         </div>
       </div>

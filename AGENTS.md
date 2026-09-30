@@ -1,6 +1,6 @@
 # AGENTS.md — `citas-web`
 
-> Generado a partir de `../prompts/agents/PROMPT_AGENT_CITAS_WEB.md` tras importar el primer export real de Google AI Studio (2026-09-18) y reconciliarlo contra el PRD/backlog. Reemplaza a `AGENTS.md.template`. Revisado/depurado contra evidencia real del repo el 2026-09-21, 2026-09-22 y 2026-09-25.
+> Generado a partir de `../prompts/agents/PROMPT_AGENT_CITAS_WEB.md` tras importar el primer export real de Google AI Studio (2026-09-18) y reconciliarlo contra el PRD/backlog. Reemplaza a `AGENTS.md.template`. Revisado/depurado contra evidencia real del repo el 2026-09-21, 2026-09-22, 2026-09-25 y 2026-09-30.
 
 ## Responsabilidad de este repo
 
@@ -9,7 +9,20 @@
 - URL de la API configurable por `VITE_API_URL` (ver `.env.example`; por defecto `http://localhost:8080`).
 - Reglas de negocio son autoridad del backend; el frontend solo valida formato en cliente (UX), nunca duplica reglas.
 
-## Estado real del código (verificado, no asumir más de esto)
+## Estado actual (verificado 2026-09-30 — esto prevalece sobre el historial de abajo)
+
+- **Todas las pantallas obligatorias del PRD (sección 6) existen** y consumen `citas-api` real. Verificado contra MySQL real en Docker (no solo backend simulado) con un recorrido Playwright de 16 flujos (3 roles) y otro en inglés.
+  - USER: inicio/dashboard (`InicioPacienteScreen`), agendar (`AgendarCitaScreen`/`BookingView`), mis citas + cancelar + reprogramar + historial, **Mi Perfil** con afiliación EPS/plan (`MiPerfilScreen`, HU-004/005), recuperación de contraseña real en 2 pasos (`PasswordRecoveryModal`, HU-003).
+  - PROFESSIONAL: inicio (`InicioProfesionalScreen`), mi agenda + cierre de atención + historial, mi disponibilidad.
+  - ADMIN: inicio (`InicioAdminScreen`), bandeja de aprobación + historial, reprogramaciones, especialidades y profesionales (+ **editar especialidades/sedes** con `AsignacionesProfesionalModal`, `PUT /api/admin/professionals/{id}/assignments`), **EPS y planes** (`AdminEpsScreen`, HU-007/008).
+- **Sesión** (`src/api/session.ts`): se guarda en `sessionStorage` (sobrevive a recargar la pestaña). Toda llamada autenticada usa `apiFetch`, que pone siempre el access token vigente, ante un `401` renueva una sola vez con `POST /api/auth/refresh` (compartido entre peticiones concurrentes) y, si el refresh falla, cierra la sesión mostrando "Tu sesión expiró".
+- **Navegación por rol** (`src/navigation.ts` + `NavTabs.tsx`): cada rol tiene pestañas propias; `isScreenAllowed` impide abrir (o restaurar tras recargar) pantallas de otro rol.
+- **Historial de estados** (`HistorialCitaModal`, HU-023): `GET /api/appointments/{id}/history`, desde Mis Citas, Mi Agenda y la Bandeja de aprobación.
+- **Idioma ES/EN completo** (`src/i18n`): `t('texto en español', vars?)`; la clave es el propio texto en español y `src/i18n/en.ts` tiene su traducción (610 entradas). Sin traducción, se muestra el español (así llegan también los mensajes del backend). El idioma se guarda en `localStorage` y las fechas usan el idioma activo.
+- **Pruebas**: `npm test` (vitest + Testing Library, 17 pruebas: sesión/refresh, navegación, JWT, recuperación de contraseña e i18n). `en.test.ts` falla si algún `t('...')` literal no tiene traducción.
+- Pendiente conocido: no hay pruebas de componentes para cada pantalla (la cobertura de flujos completos está en el recorrido Playwright, que no está versionado en el repo).
+
+## Historial de integración (cronológico; lo vigente es la sección anterior)
 
 - Dos flujos conectados al backend real: **login** (HU-002) contra `POST /api/auth/login`, con manejo de `401` (credenciales inválidas) y errores de red; y **registro** (HU-001, `RegisterScreen.tsx`) contra `POST /api/auth/register`, con manejo de `400` (mapea `detalles` a errores por campo), `409` (email/documento duplicado — el mensaje del backend ya distingue cuál) y errores de red. `SuccessView` cierra sesión contra `POST /api/auth/logout` (también HU-002).
 - La recuperación de contraseña (`PasswordRecoveryModal`) sigue siendo un **placeholder informativo**: HU-003 sigue en `Borrador` (no aprobada), por eso el modal solo indica "próximamente" en vez de simular un envío falso.
@@ -82,6 +95,8 @@
 - No añadir Express/BFF.
 - No implementar reglas de negocio solo en cliente; backend es autoridad.
 - No hardcodear tokens ni secretos; `VITE_API_URL` por environment.
+- Toda llamada autenticada va por `apiFetch` (`src/api/session.ts`), nunca `fetch` con el token a mano: así aplican el refresh y el cierre por sesión expirada.
+- Todo texto visible va dentro de `t('...')` con su traducción en `src/i18n/en.ts` (`npm test` lo exige). Constantes de nivel de módulo (mapas de estados, pestañas) se traducen en el render: `t(ETIQUETA[x])`.
 - Mantener alta fidelidad al diseño aprobado de Stitch/AI Studio al reconciliar — no rediseñar sin pedirlo el usuario (el diseño visual es responsabilidad exclusiva del usuario, ver `AGENTS.md` raíz regla 11).
 - No construir pantallas/flujos de HU que sigan en `Borrador`/`Pendiente de aprobación` en `citas-api/docs/wiki/scrum/`.
 - No editar `citas-api` desde este agente; si el contrato no alcanza, reportar el cambio cross-repo al orquestador.
@@ -92,7 +107,7 @@
 2. Identifica pantallas/componentes/servicios afectados.
 3. Mapea estados loading/empty/error/success/disabled.
 4. Implementa sin rediseñar lo aprobado.
-5. Ejecuta build/typecheck (`npm run build`, `npm run lint` — este último es `tsc --noEmit`). Node.js 24 LTS ya está instalado en la máquina del estudiante (ver `AGENTS.md` raíz); ambos comandos están verificados en `EXIT 0` a la fecha de este archivo.
+5. Ejecuta `npm run lint` (`tsc --noEmit`), `npm test` (vitest) y `npm run build`. Los tres están en `EXIT 0` al 2026-09-30.
 6. Verifica comportamiento contra criterios de aceptación.
 7. Resume evidencia.
 

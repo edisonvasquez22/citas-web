@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ApiErrorBody, AvailabilityBlockApi, SEDES, UserSession } from '../types';
 import { API_URL, apiFetch } from '../api/session';
+import { t } from '../i18n';
 
 
 interface DeleteAvailabilityBlockModalProps {
@@ -36,18 +37,22 @@ export const DeleteAvailabilityBlockModal: React.FC<DeleteAvailabilityBlockModal
 
       if (resp.status === 400) {
         const err: ApiErrorBody = await resp.json();
-        setError(err.message || 'No se pudo eliminar el bloque.');
+        setError(err.message || t("No se pudo eliminar el bloque."));
         return;
       }
       if (!resp.ok && resp.status !== 204) {
-        setError('Error de conexión con el servidor institucional. Inténtalo de nuevo más tarde.');
+        setError(t(
+          "Error de conexión con el servidor institucional. Inténtalo de nuevo más tarde."
+        ));
         return;
       }
 
       onDeleted(block.id);
       onClose();
     } catch {
-      setError('No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo.');
+      setError(t(
+        "No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo."
+      ));
     } finally {
       setDeleting(false);
     }
@@ -72,14 +77,17 @@ export const DeleteAvailabilityBlockModal: React.FC<DeleteAvailabilityBlockModal
             </div>
             <div>
               <h3 className="font-display font-semibold text-[17px] text-[#0d1c2e]">
-                ¿Eliminar bloque de disponibilidad?
+                {t("¿Eliminar bloque de disponibilidad?")}
               </h3>
               <p className="text-[13px] text-[#3e494a] mt-1 leading-relaxed">
-                Se liberará la franja de{' '}
+                {t("Se liberará la franja de")}{' '}
                 <strong className="text-[#0d1c2e]">
-                  {horaCorta(block.horaInicio)} a {horaCorta(block.horaFin)} en {SEDES[block.sedeId].corto}
-                </strong>{' '}
-                del {block.fecha}. Los pacientes ya no verán esa oferta disponible.
+                  {t('{inicio} a {fin} en {sede}', {
+                    inicio: horaCorta(block.horaInicio),
+                    fin: horaCorta(block.horaFin),
+                    sede: SEDES[block.sedeId].corto
+                  })}
+                </strong>{' '}{t('del {fecha}', { fecha: block.fecha })}{t(". Los pacientes ya no verán esa oferta disponible.")}
               </p>
             </div>
           </div>
@@ -97,7 +105,7 @@ export const DeleteAvailabilityBlockModal: React.FC<DeleteAvailabilityBlockModal
               onClick={onClose}
               className="px-4 py-2 rounded-lg border border-[#bdc9ca] text-[13px] font-semibold text-[#3e494a] hover:bg-[#eff4ff] transition-colors"
             >
-              Cancelar
+              {t("Cancelar")}
             </button>
             <button
               type="button"
@@ -106,7 +114,7 @@ export const DeleteAvailabilityBlockModal: React.FC<DeleteAvailabilityBlockModal
               className="px-4 py-2 rounded-lg bg-[#ba1a1a] hover:bg-[#93000a] text-white text-[13px] font-semibold flex items-center gap-1.5 shadow-sm transition-all disabled:opacity-60 disabled:cursor-not-allowed"
             >
               <span className="material-symbols-outlined text-[16px]">delete</span>
-              <span>{deleting ? 'Eliminando...' : 'Confirmar Eliminación'}</span>
+              <span>{deleting ? 'Eliminando...' : t("Confirmar Eliminación")}</span>
             </button>
           </div>
         </div>

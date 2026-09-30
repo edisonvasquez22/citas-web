@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ProfessionalAdminApi, SEDES, SedeId, SpecialtyApi } from '../types';
 import { apiFetch } from '../api/session';
 import { mensajeDeError } from '../api/errors';
+import { t } from '../i18n';
 
 interface AsignacionesProfesionalModalProps {
   profesional: ProfessionalAdminApi | null;
@@ -57,17 +58,19 @@ export const AsignacionesProfesionalModal: React.FC<AsignacionesProfesionalModal
     ...activeSpecialties,
     ...profesional.especialidades
       .filter((e) => !activeSpecialties.some((s) => s.id === e.especialidadId))
-      .map((e) => ({ id: e.especialidadId, nombre: `Especialidad #${e.especialidadId} (inactiva)` }))
+      .map((e) => ({ id: e.especialidadId, nombre: t("Especialidad #{especialidadId} (inactiva)", {
+      especialidadId: e.especialidadId
+    }) }))
   ];
 
   const guardar = async () => {
     setError(null);
     if (especialidades.size === 0 || primaria === null || !especialidades.has(primaria)) {
-      setError('Selecciona al menos una especialidad y marca una como primaria.');
+      setError(t("Selecciona al menos una especialidad y marca una como primaria."));
       return;
     }
     if (sedes.size === 0) {
-      setError('Selecciona al menos una sede.');
+      setError(t("Selecciona al menos una sede."));
       return;
     }
     setGuardando(true);
@@ -81,12 +84,12 @@ export const AsignacionesProfesionalModal: React.FC<AsignacionesProfesionalModal
         })
       });
       if (!resp.ok) {
-        setError(await mensajeDeError(resp, 'No se pudieron guardar las asignaciones.'));
+        setError(await mensajeDeError(resp, t("No se pudieron guardar las asignaciones.")));
         return;
       }
       onSaved(`${profesional.nombres} ${profesional.apellidos}`);
     } catch {
-      setError('No se pudo contactar al servidor.');
+      setError(t("No se pudo contactar al servidor."));
     } finally {
       setGuardando(false);
     }
@@ -105,14 +108,14 @@ export const AsignacionesProfesionalModal: React.FC<AsignacionesProfesionalModal
         onClick={(e) => e.stopPropagation()}
       >
         <h3 id="asignaciones-title" className="font-display font-semibold text-[18px] text-[#0d1c2e]">
-          Especialidades y sedes
+          {t("Especialidades y sedes")}
         </h3>
         <p className="text-[13px] text-[#3e494a] mb-4">
           {profesional.nombres} {profesional.apellidos} · {profesional.codigoProfesional}
         </p>
 
         <fieldset className="mb-4">
-          <legend className="text-[12px] font-semibold text-[#3e494a] mb-2">Especialidades (marca la primaria)</legend>
+          <legend className="text-[12px] font-semibold text-[#3e494a] mb-2">{t("Especialidades (marca la primaria)")}</legend>
           <div className="space-y-1.5">
             {opciones.map((s) => (
               <div key={s.id} className="flex items-center justify-between gap-3 text-sm">
@@ -128,7 +131,7 @@ export const AsignacionesProfesionalModal: React.FC<AsignacionesProfesionalModal
                     disabled={!especialidades.has(s.id)}
                     onChange={() => setPrimaria(s.id)}
                   />
-                  Primaria
+                  {t("Primaria")}
                 </label>
               </div>
             ))}
@@ -136,7 +139,7 @@ export const AsignacionesProfesionalModal: React.FC<AsignacionesProfesionalModal
         </fieldset>
 
         <fieldset className="mb-4">
-          <legend className="text-[12px] font-semibold text-[#3e494a] mb-2">Sedes</legend>
+          <legend className="text-[12px] font-semibold text-[#3e494a] mb-2">{t("Sedes")}</legend>
           {([1, 2] as SedeId[]).map((id) => (
             <label key={id} className="flex items-center gap-2 text-sm mb-1.5">
               <input type="checkbox" checked={sedes.has(id)} onChange={() => toggleSede(id)} />
@@ -146,7 +149,9 @@ export const AsignacionesProfesionalModal: React.FC<AsignacionesProfesionalModal
         </fieldset>
 
         <p className="text-[12px] text-[#6e797a] mb-3">
-          No se puede retirar una sede con bloques de disponibilidad futuros ni una especialidad con citas futuras.
+          {t(
+            "No se puede retirar una sede con bloques de disponibilidad futuros ni una especialidad con citas futuras."
+          )}
         </p>
 
         {error && (
@@ -157,7 +162,7 @@ export const AsignacionesProfesionalModal: React.FC<AsignacionesProfesionalModal
 
         <div className="flex justify-end gap-2">
           <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-sm text-[#3e494a] hover:bg-[#eff4ff]">
-            Cancelar
+            {t("Cancelar")}
           </button>
           <button
             type="button"
@@ -165,7 +170,7 @@ export const AsignacionesProfesionalModal: React.FC<AsignacionesProfesionalModal
             disabled={guardando}
             className="px-4 py-2 bg-[#006066] hover:bg-[#0d7a82] text-white text-sm font-semibold rounded-lg disabled:opacity-60"
           >
-            {guardando ? 'Guardando…' : 'Guardar'}
+            {guardando ? 'Guardando…' : t("Guardar")}
           </button>
         </div>
       </div>

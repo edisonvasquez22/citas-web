@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ApiErrorBody, AvailabilityBlockApi, SedeId, SEDES, UserSession } from '../types';
 import { API_URL, apiFetch } from '../api/session';
+import { t } from '../i18n';
 
 
 interface EditAvailabilityBlockModalProps {
@@ -44,10 +45,13 @@ export const EditAvailabilityBlockModal: React.FC<EditAvailabilityBlockModalProp
   const duracion = calcularDuracionMinutos(horaInicio, horaFin);
   const preview =
     duracion <= 0
-      ? { text: 'Horario no válido (fin anterior a inicio)', valid: false }
+      ? { text: t("Horario no válido (fin anterior a inicio)"), valid: false }
       : duracion % 30 !== 0
-      ? { text: 'La franja debe ser múltiplo de 30 minutos', valid: false }
-      : { text: `${(duracion / 60).toFixed(1)} h • ${Math.floor(duracion / 30)} cupos de 30 min`, valid: true };
+      ? { text: t("La franja debe ser múltiplo de 30 minutos"), valid: false }
+      : { text: t("{v} h • {v2} cupos de 30 min", {
+      v: (duracion / 60).toFixed(1),
+      v2: Math.floor(duracion / 30)
+    }), valid: true };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,11 +75,13 @@ export const EditAvailabilityBlockModal: React.FC<EditAvailabilityBlockModalProp
 
       if (resp.status === 400) {
         const err: ApiErrorBody = await resp.json();
-        setError(err.message || 'No se pudo actualizar el bloque.');
+        setError(err.message || t("No se pudo actualizar el bloque."));
         return;
       }
       if (!resp.ok) {
-        setError('Error de conexión con el servidor institucional. Inténtalo de nuevo más tarde.');
+        setError(t(
+          "Error de conexión con el servidor institucional. Inténtalo de nuevo más tarde."
+        ));
         return;
       }
 
@@ -83,7 +89,9 @@ export const EditAvailabilityBlockModal: React.FC<EditAvailabilityBlockModalProp
       onUpdated(actualizado);
       onClose();
     } catch {
-      setError('No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo.');
+      setError(t(
+        "No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo."
+      ));
     } finally {
       setSaving(false);
     }
@@ -105,13 +113,13 @@ export const EditAvailabilityBlockModal: React.FC<EditAvailabilityBlockModalProp
           <div className="flex items-center justify-between border-b border-[#e6eeff] pb-3">
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-[#006066]">edit_calendar</span>
-              <h3 className="font-display font-semibold text-[17px] text-[#0d1c2e]">Modificar Bloque de Disponibilidad</h3>
+              <h3 className="font-display font-semibold text-[17px] text-[#0d1c2e]">{t("Modificar Bloque de Disponibilidad")}</h3>
             </div>
             <button
               type="button"
               onClick={onClose}
               className="text-[#6e797a] hover:text-[#0d1c2e] p-1 rounded-md hover:bg-[#eff4ff]"
-              aria-label="Cerrar modal"
+              aria-label={t("Cerrar modal")}
             >
               <span className="material-symbols-outlined text-[18px]">close</span>
             </button>
@@ -127,7 +135,7 @@ export const EditAvailabilityBlockModal: React.FC<EditAvailabilityBlockModalProp
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
               <label htmlFor="edit-sede" className="text-[13px] font-semibold text-[#0d1c2e]">
-                Sede Hospitalaria <span className="text-[#ba1a1a]">*</span>
+                {t("Sede Hospitalaria")} <span className="text-[#ba1a1a]">*</span>
               </label>
               <select
                 id="edit-sede"
@@ -145,7 +153,7 @@ export const EditAvailabilityBlockModal: React.FC<EditAvailabilityBlockModalProp
 
             <div className="flex flex-col gap-1.5">
               <label htmlFor="edit-fecha" className="text-[13px] font-semibold text-[#0d1c2e]">
-                Fecha <span className="text-[#ba1a1a]">*</span>
+                {t("Fecha")} <span className="text-[#ba1a1a]">*</span>
               </label>
               <input
                 id="edit-fecha"
@@ -160,7 +168,7 @@ export const EditAvailabilityBlockModal: React.FC<EditAvailabilityBlockModalProp
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-1.5">
                 <label htmlFor="edit-inicio" className="text-[13px] font-semibold text-[#0d1c2e]">
-                  Hora Inicio <span className="text-[#ba1a1a]">*</span>
+                  {t("Hora Inicio")} <span className="text-[#ba1a1a]">*</span>
                 </label>
                 <input
                   id="edit-inicio"
@@ -173,7 +181,7 @@ export const EditAvailabilityBlockModal: React.FC<EditAvailabilityBlockModalProp
               </div>
               <div className="flex flex-col gap-1.5">
                 <label htmlFor="edit-fin" className="text-[13px] font-semibold text-[#0d1c2e]">
-                  Hora Fin <span className="text-[#ba1a1a]">*</span>
+                  {t("Hora Fin")} <span className="text-[#ba1a1a]">*</span>
                 </label>
                 <input
                   id="edit-fin"
@@ -193,7 +201,7 @@ export const EditAvailabilityBlockModal: React.FC<EditAvailabilityBlockModalProp
             >
               <span className="flex items-center gap-1.5 font-medium">
                 <span className="material-symbols-outlined text-[16px]">schedule</span>
-                Discretización automática:
+                {t("Discretización automática:")}
               </span>
               <span className="font-semibold">{preview.text}</span>
             </div>
@@ -204,7 +212,7 @@ export const EditAvailabilityBlockModal: React.FC<EditAvailabilityBlockModalProp
                 onClick={onClose}
                 className="px-4 py-2 rounded-lg border border-[#bdc9ca] text-[13px] font-semibold text-[#3e494a] hover:bg-[#eff4ff] transition-colors"
               >
-                Cancelar
+                {t("Cancelar")}
               </button>
               <button
                 type="submit"
@@ -212,7 +220,7 @@ export const EditAvailabilityBlockModal: React.FC<EditAvailabilityBlockModalProp
                 className="px-4 py-2 rounded-lg bg-[#006066] hover:bg-[#0d7a82] text-white text-[13px] font-semibold flex items-center gap-1.5 shadow-sm transition-all disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <span className="material-symbols-outlined text-[16px]">check</span>
-                <span>{saving ? 'Guardando...' : 'Guardar Cambios'}</span>
+                <span>{saving ? 'Guardando...' : t("Guardar Cambios")}</span>
               </button>
             </div>
           </form>

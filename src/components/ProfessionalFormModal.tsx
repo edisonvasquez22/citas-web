@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ApiErrorBody, DocumentType, ProfessionalAdminApi, SedeId, SEDES, SpecialtyApi, UserSession } from '../types';
 import { API_URL, apiFetch } from '../api/session';
+import { t } from '../i18n';
 
 
 interface ProfessionalFormModalProps {
@@ -83,11 +84,13 @@ export const ProfessionalFormModal: React.FC<ProfessionalFormModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!primariaValida) {
-      setError('Selecciona al menos una especialidad y marca exactamente una como primaria.');
+      setError(t(
+        "Selecciona al menos una especialidad y marca exactamente una como primaria."
+      ));
       return;
     }
     if (password.length < 8) {
-      setError('La contraseña inicial debe tener al menos 8 caracteres.');
+      setError(t("La contraseña inicial debe tener al menos 8 caracteres."));
       return;
     }
 
@@ -117,11 +120,13 @@ export const ProfessionalFormModal: React.FC<ProfessionalFormModalProps> = ({
 
       if (resp.status === 400) {
         const err: ApiErrorBody = await resp.json();
-        setError(err.message || (err.detalles ?? []).join(' ') || 'No se pudo registrar el profesional.');
+        setError(err.message || (err.detalles ?? []).join(' ') || t("No se pudo registrar el profesional."));
         return;
       }
       if (!resp.ok) {
-        setError('Error de conexión con el servidor institucional. Inténtalo de nuevo más tarde.');
+        setError(t(
+          "Error de conexión con el servidor institucional. Inténtalo de nuevo más tarde."
+        ));
         return;
       }
 
@@ -146,7 +151,9 @@ export const ProfessionalFormModal: React.FC<ProfessionalFormModalProps> = ({
       });
       onClose();
     } catch {
-      setError('No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo.');
+      setError(t(
+        "No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo."
+      ));
     } finally {
       setSaving(false);
     }
@@ -168,13 +175,13 @@ export const ProfessionalFormModal: React.FC<ProfessionalFormModalProps> = ({
           <div className="flex items-center justify-between border-b border-[#e6eeff] pb-3">
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-[#006066]">person_add</span>
-              <h3 className="font-display font-semibold text-[17px] text-[#0d1c2e]">Registrar Profesional</h3>
+              <h3 className="font-display font-semibold text-[17px] text-[#0d1c2e]">{t("Registrar Profesional")}</h3>
             </div>
             <button
               type="button"
               onClick={onClose}
               className="text-[#6e797a] hover:text-[#0d1c2e] p-1 rounded-md hover:bg-[#eff4ff]"
-              aria-label="Cerrar modal"
+              aria-label={t("Cerrar modal")}
             >
               <span className="material-symbols-outlined text-[18px]">close</span>
             </button>
@@ -190,7 +197,7 @@ export const ProfessionalFormModal: React.FC<ProfessionalFormModalProps> = ({
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div className="flex flex-col gap-1.5">
-                <label htmlFor="prof-nombres" className="text-[13px] font-semibold text-[#0d1c2e]">Nombres *</label>
+                <label htmlFor="prof-nombres" className="text-[13px] font-semibold text-[#0d1c2e]">{t("Nombres *")}</label>
                 <input
                   id="prof-nombres"
                   type="text"
@@ -201,7 +208,7 @@ export const ProfessionalFormModal: React.FC<ProfessionalFormModalProps> = ({
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <label htmlFor="prof-apellidos" className="text-[13px] font-semibold text-[#0d1c2e]">Apellidos *</label>
+                <label htmlFor="prof-apellidos" className="text-[13px] font-semibold text-[#0d1c2e]">{t("Apellidos *")}</label>
                 <input
                   id="prof-apellidos"
                   type="text"
@@ -215,21 +222,21 @@ export const ProfessionalFormModal: React.FC<ProfessionalFormModalProps> = ({
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
               <div className="flex flex-col gap-1.5">
-                <label htmlFor="prof-tipo-documento" className="text-[13px] font-semibold text-[#0d1c2e]">Tipo Doc. *</label>
+                <label htmlFor="prof-tipo-documento" className="text-[13px] font-semibold text-[#0d1c2e]">{t("Tipo Doc. *")}</label>
                 <select
                   id="prof-tipo-documento"
                   value={tipoDocumento}
                   onChange={(e) => setTipoDocumento(e.target.value as DocumentType)}
                   className="w-full px-3 py-2.5 bg-white border border-[#bdc9ca] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0d7a82]"
                 >
-                  <option value="CC">Cédula de Ciudadanía</option>
-                  <option value="CE">Cédula de Extranjería</option>
-                  <option value="TI">Tarjeta de Identidad</option>
-                  <option value="PAS">Pasaporte</option>
+                  <option value="CC">{t("Cédula de Ciudadanía")}</option>
+                  <option value="CE">{t("Cédula de Extranjería")}</option>
+                  <option value="TI">{t("Tarjeta de Identidad")}</option>
+                  <option value="PAS">{t("Pasaporte")}</option>
                 </select>
               </div>
               <div className="sm:col-span-2 flex flex-col gap-1.5">
-                <label htmlFor="prof-numero-documento" className="text-[13px] font-semibold text-[#0d1c2e]">Número de Documento *</label>
+                <label htmlFor="prof-numero-documento" className="text-[13px] font-semibold text-[#0d1c2e]">{t("Número de Documento *")}</label>
                 <input
                   id="prof-numero-documento"
                   type="text"
@@ -243,7 +250,7 @@ export const ProfessionalFormModal: React.FC<ProfessionalFormModalProps> = ({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div className="flex flex-col gap-1.5">
-                <label htmlFor="prof-email" className="text-[13px] font-semibold text-[#0d1c2e]">Email *</label>
+                <label htmlFor="prof-email" className="text-[13px] font-semibold text-[#0d1c2e]">{t("Email *")}</label>
                 <input
                   id="prof-email"
                   type="email"
@@ -254,7 +261,7 @@ export const ProfessionalFormModal: React.FC<ProfessionalFormModalProps> = ({
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <label htmlFor="prof-telefono" className="text-[13px] font-semibold text-[#0d1c2e]">Teléfono *</label>
+                <label htmlFor="prof-telefono" className="text-[13px] font-semibold text-[#0d1c2e]">{t("Teléfono *")}</label>
                 <input
                   id="prof-telefono"
                   type="tel"
@@ -267,7 +274,7 @@ export const ProfessionalFormModal: React.FC<ProfessionalFormModalProps> = ({
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="prof-password" className="text-[13px] font-semibold text-[#0d1c2e]">Contraseña Inicial * (mín. 8 caracteres)</label>
+              <label htmlFor="prof-password" className="text-[13px] font-semibold text-[#0d1c2e]">{t("Contraseña Inicial * (mín. 8 caracteres)")}</label>
               <input
                 id="prof-password"
                 type="password"
@@ -281,7 +288,7 @@ export const ProfessionalFormModal: React.FC<ProfessionalFormModalProps> = ({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div className="flex flex-col gap-1.5">
-                <label htmlFor="prof-codigo-profesional" className="text-[13px] font-semibold text-[#0d1c2e]">Código Profesional *</label>
+                <label htmlFor="prof-codigo-profesional" className="text-[13px] font-semibold text-[#0d1c2e]">{t("Código Profesional *")}</label>
                 <input
                   id="prof-codigo-profesional"
                   type="text"
@@ -292,7 +299,7 @@ export const ProfessionalFormModal: React.FC<ProfessionalFormModalProps> = ({
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <label htmlFor="prof-matricula" className="text-[13px] font-semibold text-[#0d1c2e]">Matrícula *</label>
+                <label htmlFor="prof-matricula" className="text-[13px] font-semibold text-[#0d1c2e]">{t("Matrícula *")}</label>
                 <input
                   id="prof-matricula"
                   type="text"
@@ -306,10 +313,12 @@ export const ProfessionalFormModal: React.FC<ProfessionalFormModalProps> = ({
 
             <div className="p-3.5 bg-[#eff4ff] rounded-xl border border-[#d5e3fc] flex flex-col gap-2.5">
               <div className="flex items-center justify-between">
-                <span className="text-[12px] font-bold text-[#0d1c2e] uppercase tracking-wider">Especialidades (marca una como primaria)</span>
+                <span className="text-[12px] font-bold text-[#0d1c2e] uppercase tracking-wider">{t("Especialidades (marca una como primaria)")}</span>
               </div>
               {activeSpecialties.length === 0 ? (
-                <p className="text-[12px] text-[#6e797a]">No hay especialidades activas. Crea una en la pestaña Especialidades primero.</p>
+                <p className="text-[12px] text-[#6e797a]">{t(
+                  "No hay especialidades activas. Crea una en la pestaña Especialidades primero."
+                )}</p>
               ) : (
                 activeSpecialties.map((spec) => {
                   const seleccionada = especialidadesSeleccionadas.has(spec.id);
@@ -332,7 +341,7 @@ export const ProfessionalFormModal: React.FC<ProfessionalFormModalProps> = ({
                           checked={primaria === spec.id}
                           onChange={() => setPrimaria(spec.id)}
                         />
-                        <span className="text-[11px] font-semibold text-[#436088]">Primaria</span>
+                        <span className="text-[11px] font-semibold text-[#436088]">{t("Primaria")}</span>
                       </label>
                     </div>
                   );
@@ -341,7 +350,7 @@ export const ProfessionalFormModal: React.FC<ProfessionalFormModalProps> = ({
             </div>
 
             <div className="flex flex-col gap-2">
-              <span className="text-[13px] font-semibold text-[#0d1c2e]">Sedes Asignadas *</span>
+              <span className="text-[13px] font-semibold text-[#0d1c2e]">{t("Sedes Asignadas *")}</span>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {([1, 2] as SedeId[]).map((id) => (
                   <label
@@ -371,7 +380,7 @@ export const ProfessionalFormModal: React.FC<ProfessionalFormModalProps> = ({
                 onClick={onClose}
                 className="px-4 py-2 rounded-lg border border-[#bdc9ca] text-[13px] font-semibold text-[#3e494a] hover:bg-[#eff4ff] transition-colors"
               >
-                Cancelar
+                {t("Cancelar")}
               </button>
               <button
                 type="submit"
@@ -379,7 +388,7 @@ export const ProfessionalFormModal: React.FC<ProfessionalFormModalProps> = ({
                 className="px-4 py-2 rounded-lg bg-[#006066] hover:bg-[#0d7a82] text-white text-[13px] font-semibold flex items-center gap-1.5 shadow-sm transition-all disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <span className="material-symbols-outlined text-[16px]">check</span>
-                <span>{saving ? 'Registrando...' : 'Registrar Profesional'}</span>
+                <span>{saving ? 'Registrando...' : t("Registrar Profesional")}</span>
               </button>
             </div>
           </form>

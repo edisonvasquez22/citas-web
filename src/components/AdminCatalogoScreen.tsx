@@ -5,6 +5,7 @@ import { ProfessionalFormModal } from './ProfessionalFormModal';
 import { AsignacionesProfesionalModal } from './AsignacionesProfesionalModal';
 import { AdminNavTabs } from './AdminNavTabs';
 import { API_URL, apiFetch } from '../api/session';
+import { t } from '../i18n';
 
 
 interface AdminCatalogoScreenProps {
@@ -44,7 +45,9 @@ export const AdminCatalogoScreen: React.FC<AdminCatalogoScreenProps> = ({ sessio
       setSpecialties(await respEsp.json());
       setProfessionals(await respProf.json());
     } catch {
-      setLoadError('No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo.');
+      setLoadError(t(
+        "No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo."
+      ));
     } finally {
       setLoading(false);
     }
@@ -65,13 +68,13 @@ export const AdminCatalogoScreen: React.FC<AdminCatalogoScreenProps> = ({ sessio
         body: JSON.stringify({ activa: !spec.activa })
       });
       if (!resp.ok) {
-        setFeedback({ type: 'info', title: 'No se pudo cambiar el estado', message: 'Error de conexión con el servidor institucional.' });
+        setFeedback({ type: 'info', title: t("No se pudo cambiar el estado"), message: t("Error de conexión con el servidor institucional.") });
         return;
       }
       const actualizado: SpecialtyApi = await resp.json();
       setSpecialties((prev) => prev.map((s) => (s.id === actualizado.id ? actualizado : s)));
     } catch {
-      setFeedback({ type: 'info', title: 'Error de Conexión', message: 'No se pudo contactar al servidor institucional.' });
+      setFeedback({ type: 'info', title: t("Error de Conexión"), message: t("No se pudo contactar al servidor institucional.") });
     }
   };
 
@@ -79,8 +82,11 @@ export const AdminCatalogoScreen: React.FC<AdminCatalogoScreenProps> = ({ sessio
     setSpecialties((prev) => (mode === 'create' ? [...prev, saved] : prev.map((s) => (s.id === saved.id ? saved : s))));
     setFeedback({
       type: 'success',
-      title: mode === 'create' ? 'Especialidad creada' : 'Especialidad actualizada',
-      message: `"${saved.nombre}" (${saved.codigo}) se guardó correctamente.`
+      title: mode === 'create' ? t("Especialidad creada") : t("Especialidad actualizada"),
+      message: t("\"{nombre}\" ({codigo}) se guardó correctamente.", {
+        nombre: saved.nombre,
+        codigo: saved.codigo
+      })
     });
   };
 
@@ -92,12 +98,12 @@ export const AdminCatalogoScreen: React.FC<AdminCatalogoScreenProps> = ({ sessio
         body: JSON.stringify({ activo: !prof.activo })
       });
       if (!resp.ok) {
-        setFeedback({ type: 'info', title: 'No se pudo cambiar el estado', message: 'Error de conexión con el servidor institucional.' });
+        setFeedback({ type: 'info', title: t("No se pudo cambiar el estado"), message: t("Error de conexión con el servidor institucional.") });
         return;
       }
       setProfessionals((prev) => prev.map((p) => (p.profesionalId === prof.profesionalId ? { ...p, activo: !p.activo } : p)));
     } catch {
-      setFeedback({ type: 'info', title: 'Error de Conexión', message: 'No se pudo contactar al servidor institucional.' });
+      setFeedback({ type: 'info', title: t("Error de Conexión"), message: t("No se pudo contactar al servidor institucional.") });
     }
   };
 
@@ -105,8 +111,15 @@ export const AdminCatalogoScreen: React.FC<AdminCatalogoScreenProps> = ({ sessio
     setProfessionals((prev) => [...prev, creado]);
     setFeedback({
       type: 'success',
-      title: 'Profesional registrado',
-      message: `Dr(a). ${creado.nombres} ${creado.apellidos} (${creado.codigoProfesional}) se registró correctamente.`
+      title: t("Profesional registrado"),
+      message: t(
+        "Dr(a). {nombres} {apellidos} ({codigoProfesional}) se registró correctamente.",
+        {
+          nombres: creado.nombres,
+          apellidos: creado.apellidos,
+          codigoProfesional: creado.codigoProfesional
+        }
+      )
     });
   };
 
@@ -119,11 +132,13 @@ export const AdminCatalogoScreen: React.FC<AdminCatalogoScreenProps> = ({ sessio
         <div>
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#dce9ff] text-[#001c3a] text-[11px] font-bold tracking-wider uppercase mb-2">
             <span className="material-symbols-outlined text-[14px]">inventory_2</span>
-            Gestión de Catálogo
+            {t("Gestión de Catálogo")}
           </span>
-          <h1 className="font-display text-2xl sm:text-3xl font-bold text-[#0d1c2e] tracking-tight">Especialidades y Profesionales</h1>
+          <h1 className="font-display text-2xl sm:text-3xl font-bold text-[#0d1c2e] tracking-tight">{t("Especialidades y Profesionales")}</h1>
           <p className="text-sm text-[#3e494a] mt-1 max-w-2xl leading-relaxed">
-            Administra el catálogo de especialidades asistenciales y el directorio de profesionales en las sedes HIC e ICV.
+            {t(
+              "Administra el catálogo de especialidades asistenciales y el directorio de profesionales en las sedes HIC e ICV."
+            )}
           </p>
         </div>
         <div className="flex items-center p-1 bg-[#eff4ff] rounded-xl border border-[#dce9ff] self-start">
@@ -134,8 +149,8 @@ export const AdminCatalogoScreen: React.FC<AdminCatalogoScreenProps> = ({ sessio
               subTab === 'especialidades' ? 'bg-white text-[#006066] shadow-xs' : 'text-[#3e494a]'
             }`}
           >
-            Especialidades ({specialties.length})
-          </button>
+            {t("Especialidades (")}{specialties.length})
+                      </button>
           <button
             type="button"
             onClick={() => setSubTab('profesionales')}
@@ -143,8 +158,8 @@ export const AdminCatalogoScreen: React.FC<AdminCatalogoScreenProps> = ({ sessio
               subTab === 'profesionales' ? 'bg-white text-[#006066] shadow-xs' : 'text-[#3e494a]'
             }`}
           >
-            Profesionales ({professionals.length})
-          </button>
+            {t("Profesionales (")}{professionals.length})
+                      </button>
         </div>
       </div>
 
@@ -171,13 +186,13 @@ export const AdminCatalogoScreen: React.FC<AdminCatalogoScreenProps> = ({ sessio
       {loading ? (
         <div className="bg-white rounded-xl shadow-sm border border-[#e6eeff] p-10 flex flex-col items-center text-center">
           <span className="material-symbols-outlined text-[36px] text-[#0d7a82] animate-spin">progress_activity</span>
-          <p className="text-sm text-[#3e494a] mt-3">Cargando catálogo...</p>
+          <p className="text-sm text-[#3e494a] mt-3">{t("Cargando catálogo...")}</p>
         </div>
       ) : loadError ? (
         <div className="rounded-xl p-6 bg-[#ffdad6] text-[#93000a] border border-[#ba1a1a]/20 flex items-start gap-4">
           <span className="material-symbols-outlined text-[28px]">wifi_off</span>
           <div>
-            <h3 className="font-bold">Error de Conexión</h3>
+            <h3 className="font-bold">{t("Error de Conexión")}</h3>
             <p className="text-sm mt-1">{loadError}</p>
           </div>
         </div>
@@ -193,7 +208,7 @@ export const AdminCatalogoScreen: React.FC<AdminCatalogoScreenProps> = ({ sessio
               className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-gradient-to-r from-[#006066] to-[#0d7a82] text-white text-sm font-semibold shadow-sm"
             >
               <span className="material-symbols-outlined text-[18px]">add</span>
-              Nueva Especialidad
+              {t("Nueva Especialidad")}
             </button>
           </div>
 
@@ -202,19 +217,19 @@ export const AdminCatalogoScreen: React.FC<AdminCatalogoScreenProps> = ({ sessio
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-[#eff4ff] text-[#3e494a] text-[11px] font-bold uppercase tracking-wider border-b border-[#e6eeff]">
-                    <th className="py-3.5 px-6">Código</th>
-                    <th className="py-3.5 px-4">Nombre</th>
-                    <th className="py-3.5 px-4">Duración</th>
-                    <th className="py-3.5 px-4">Tipo</th>
-                    <th className="py-3.5 px-4">Estado</th>
-                    <th className="py-3.5 px-6 text-right">Acciones</th>
+                    <th className="py-3.5 px-6">{t("Código")}</th>
+                    <th className="py-3.5 px-4">{t("Nombre")}</th>
+                    <th className="py-3.5 px-4">{t("Duración")}</th>
+                    <th className="py-3.5 px-4">{t("Tipo")}</th>
+                    <th className="py-3.5 px-4">{t("Estado")}</th>
+                    <th className="py-3.5 px-6 text-right">{t("Acciones")}</th>
                   </tr>
                 </thead>
                 <tbody className="text-sm divide-y divide-[#eff4ff]">
                   {specialties.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="py-12 text-center text-[#6e797a]">
-                        No hay especialidades registradas todavía.
+                        {t("No hay especialidades registradas todavía.")}
                       </td>
                     </tr>
                   ) : (
@@ -228,18 +243,18 @@ export const AdminCatalogoScreen: React.FC<AdminCatalogoScreenProps> = ({ sessio
                         <td className="py-3.5 px-4">
                           <div className="flex flex-wrap items-center gap-1.5">
                             <span className="px-2.5 py-0.5 rounded-full bg-[#e6eeff] text-xs font-medium text-[#3c5981]">
-                              {spec.general ? 'General' : 'Especializada'}
+                              {spec.general ? t("General") : t("Especializada")}
                             </span>
                             {spec.requiereAprobacionAdmin && (
-                              <span className="px-2 py-0.5 rounded bg-[#ffeed9] text-[#7a4100] text-xs font-medium">Requiere aprobación</span>
+                              <span className="px-2 py-0.5 rounded bg-[#ffeed9] text-[#7a4100] text-xs font-medium">{t("Requiere aprobación")}</span>
                             )}
                           </div>
                         </td>
                         <td className="py-3.5 px-4">
                           {spec.activa ? (
-                            <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold">Activa</span>
+                            <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold">{t("Activa")}</span>
                           ) : (
-                            <span className="px-2.5 py-1 rounded-full bg-[#e6eeff] text-[#6e797a] text-xs font-semibold">Inactiva</span>
+                            <span className="px-2.5 py-1 rounded-full bg-[#e6eeff] text-[#6e797a] text-xs font-semibold">{t("Inactiva")}</span>
                           )}
                         </td>
                         <td className="py-3.5 px-6 text-right whitespace-nowrap">
@@ -252,14 +267,14 @@ export const AdminCatalogoScreen: React.FC<AdminCatalogoScreenProps> = ({ sessio
                               }}
                               className="px-2.5 py-1 rounded-lg hover:bg-[#e6eeff] text-[#006066] text-xs font-semibold"
                             >
-                              Editar
+                              {t("Editar")}
                             </button>
                             <button
                               type="button"
                               onClick={() => handleToggleSpecialty(spec)}
                               className="px-2.5 py-1 rounded-lg hover:bg-[#e6eeff] text-[#3e494a] text-xs font-semibold"
                             >
-                              {spec.activa ? 'Desactivar' : 'Activar'}
+                              {spec.activa ? t("Desactivar") : t("Activar")}
                             </button>
                           </div>
                         </td>
@@ -280,7 +295,7 @@ export const AdminCatalogoScreen: React.FC<AdminCatalogoScreenProps> = ({ sessio
               className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-gradient-to-r from-[#006066] to-[#0d7a82] text-white text-sm font-semibold shadow-sm"
             >
               <span className="material-symbols-outlined text-[18px]">person_add</span>
-              Registrar Profesional
+              {t("Registrar Profesional")}
             </button>
           </div>
 
@@ -289,19 +304,19 @@ export const AdminCatalogoScreen: React.FC<AdminCatalogoScreenProps> = ({ sessio
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-[#eff4ff] text-[#3e494a] text-[11px] font-bold uppercase tracking-wider border-b border-[#e6eeff]">
-                    <th className="py-3.5 px-6">Profesional</th>
-                    <th className="py-3.5 px-4">Contacto</th>
-                    <th className="py-3.5 px-4">Especialidades</th>
-                    <th className="py-3.5 px-4">Sedes</th>
-                    <th className="py-3.5 px-4">Estado</th>
-                    <th className="py-3.5 px-6 text-right">Acción</th>
+                    <th className="py-3.5 px-6">{t("Profesional")}</th>
+                    <th className="py-3.5 px-4">{t("Contacto")}</th>
+                    <th className="py-3.5 px-4">{t("Especialidades")}</th>
+                    <th className="py-3.5 px-4">{t("Sedes")}</th>
+                    <th className="py-3.5 px-4">{t("Estado")}</th>
+                    <th className="py-3.5 px-6 text-right">{t("Acción")}</th>
                   </tr>
                 </thead>
                 <tbody className="text-sm divide-y divide-[#eff4ff]">
                   {professionals.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="py-12 text-center text-[#6e797a]">
-                        No hay profesionales registrados todavía.
+                        {t("No hay profesionales registrados todavía.")}
                       </td>
                     </tr>
                   ) : (
@@ -310,7 +325,7 @@ export const AdminCatalogoScreen: React.FC<AdminCatalogoScreenProps> = ({ sessio
                         <td className="py-3.5 px-6">
                           <div className="flex flex-col">
                             <span className="font-semibold text-[#0d1c2e]">
-                              Dr(a). {prof.nombres} {prof.apellidos}
+                              {t("Dr(a).")} {prof.nombres} {prof.apellidos}
                             </span>
                             <span className="text-xs text-[#6e797a] font-mono">{prof.codigoProfesional} · {prof.matricula}</span>
                           </div>
@@ -330,7 +345,9 @@ export const AdminCatalogoScreen: React.FC<AdminCatalogoScreenProps> = ({ sessio
                                   e.primaria ? 'bg-[#0d7a82] text-white' : 'bg-[#e6eeff] text-[#3e494a]'
                                 }`}
                               >
-                                {especialidadPorId.get(e.especialidadId)?.nombre ?? `Especialidad #${e.especialidadId}`}
+                                {especialidadPorId.get(e.especialidadId)?.nombre ?? t("Especialidad #{especialidadId}", {
+                                  especialidadId: e.especialidadId
+                                })}
                               </span>
                             ))}
                           </div>
@@ -340,9 +357,9 @@ export const AdminCatalogoScreen: React.FC<AdminCatalogoScreenProps> = ({ sessio
                         </td>
                         <td className="py-3.5 px-4">
                           {prof.activo ? (
-                            <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold">Activo</span>
+                            <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold">{t("Activo")}</span>
                           ) : (
-                            <span className="px-2.5 py-1 rounded-full bg-[#e6eeff] text-[#6e797a] text-xs font-semibold">Inactivo</span>
+                            <span className="px-2.5 py-1 rounded-full bg-[#e6eeff] text-[#6e797a] text-xs font-semibold">{t("Inactivo")}</span>
                           )}
                         </td>
                         <td className="py-3.5 px-6 text-right whitespace-nowrap">
@@ -351,14 +368,14 @@ export const AdminCatalogoScreen: React.FC<AdminCatalogoScreenProps> = ({ sessio
                             onClick={() => setProfesionalAsignaciones(prof)}
                             className="px-2.5 py-1 rounded-lg hover:bg-[#e6eeff] text-[#006066] text-xs font-semibold"
                           >
-                            Editar asignaciones
+                            {t("Editar asignaciones")}
                           </button>
                           <button
                             type="button"
                             onClick={() => handleToggleProfessional(prof)}
                             className="px-2.5 py-1 rounded-lg hover:bg-[#e6eeff] text-[#3e494a] text-xs font-semibold"
                           >
-                            {prof.activo ? 'Desactivar' : 'Activar'}
+                            {prof.activo ? t("Desactivar") : t("Activar")}
                           </button>
                         </td>
                       </tr>
@@ -391,7 +408,7 @@ export const AdminCatalogoScreen: React.FC<AdminCatalogoScreenProps> = ({ sessio
         onClose={() => setProfesionalAsignaciones(null)}
         onSaved={(nombre) => {
           setProfesionalAsignaciones(null);
-          setFeedback({ type: 'success', title: 'Asignaciones actualizadas', message: `Se actualizaron las especialidades y sedes de ${nombre}.` });
+          setFeedback({ type: 'success', title: t('Asignaciones actualizadas'), message: t('Se actualizaron las especialidades y sedes de {nombre}.', { nombre }) });
           loadAll();
         }}
       />

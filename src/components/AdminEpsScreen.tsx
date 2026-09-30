@@ -3,6 +3,7 @@ import { ActiveScreen, EpsApi, PlanEpsApi, REGIMENES } from '../types';
 import { apiFetch } from '../api/session';
 import { mensajeDeError } from '../api/errors';
 import { AdminNavTabs } from './AdminNavTabs';
+import { t } from '../i18n';
 
 const inputClass =
   'w-full px-3 py-2 rounded-lg bg-[#eff4ff] border border-[#bdc9ca]/60 text-sm text-[#0d1c2e] focus:outline-none focus:ring-2 focus:ring-[#0d7a82]';
@@ -37,7 +38,7 @@ export const AdminEpsScreen: React.FC<AdminEpsScreenProps> = ({ onNavigate }) =>
       setSeleccionada((actual) => (actual ? lista.find((x) => x.id === actual.id) ?? null : lista[0] ?? null));
       setErrorCarga(null);
     } catch {
-      setErrorCarga('No se pudo cargar el catálogo de EPS.');
+      setErrorCarga(t("No se pudo cargar el catálogo de EPS."));
     } finally {
       setCargando(false);
     }
@@ -62,14 +63,14 @@ export const AdminEpsScreen: React.FC<AdminEpsScreenProps> = ({ onNavigate }) =>
     try {
       const resp = await peticion();
       if (!resp.ok) {
-        setAviso({ tipo: 'error', texto: await mensajeDeError(resp, 'La operación no se pudo completar.') });
+        setAviso({ tipo: 'error', texto: await mensajeDeError(resp, t("La operación no se pudo completar.")) });
         return false;
       }
       setAviso({ tipo: 'ok', texto: exito });
       await recargar();
       return true;
     } catch {
-      setAviso({ tipo: 'error', texto: 'No se pudo contactar al servidor.' });
+      setAviso({ tipo: 'error', texto: t("No se pudo contactar al servidor.") });
       return false;
     }
   };
@@ -77,7 +78,7 @@ export const AdminEpsScreen: React.FC<AdminEpsScreenProps> = ({ onNavigate }) =>
   const crearEps = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nuevaEps.codigo.trim() || !nuevaEps.nombre.trim()) {
-      setAviso({ tipo: 'error', texto: 'Código y nombre de la EPS son obligatorios.' });
+      setAviso({ tipo: 'error', texto: t("Código y nombre de la EPS son obligatorios.") });
       return;
     }
     const ok = await ejecutar(
@@ -87,7 +88,7 @@ export const AdminEpsScreen: React.FC<AdminEpsScreenProps> = ({ onNavigate }) =>
           headers: JSON_HEADERS,
           body: JSON.stringify({ codigo: nuevaEps.codigo.trim(), nombre: nuevaEps.nombre.trim() })
         }),
-      'EPS creada.',
+      t("EPS creada."),
       cargarEps
     );
     if (ok) setNuevaEps({ codigo: '', nombre: '' });
@@ -97,7 +98,7 @@ export const AdminEpsScreen: React.FC<AdminEpsScreenProps> = ({ onNavigate }) =>
     e.preventDefault();
     if (!seleccionada) return;
     if (!nuevoPlan.codigo.trim() || !nuevoPlan.nombre.trim()) {
-      setAviso({ tipo: 'error', texto: 'Código y nombre del plan son obligatorios.' });
+      setAviso({ tipo: 'error', texto: t("Código y nombre del plan son obligatorios.") });
       return;
     }
     const ok = await ejecutar(
@@ -111,7 +112,7 @@ export const AdminEpsScreen: React.FC<AdminEpsScreenProps> = ({ onNavigate }) =>
             nombre: nuevoPlan.nombre.trim()
           })
         }),
-      'Plan creado.',
+      t("Plan creado."),
       () => cargarPlanes(seleccionada.id)
     );
     if (ok) setNuevoPlan({ regimenId: 1, codigo: '', nombre: '' });
@@ -125,7 +126,7 @@ export const AdminEpsScreen: React.FC<AdminEpsScreenProps> = ({ onNavigate }) =>
         : `/api/admin/eps/${seleccionada?.id}/plans/${editando.id}`;
     const ok = await ejecutar(
       () => apiFetch(url, { method: 'PUT', headers: JSON_HEADERS, body: JSON.stringify({ nombre: editando.nombre.trim() }) }),
-      'Nombre actualizado.',
+      t("Nombre actualizado."),
       editando.tipo === 'eps' ? cargarEps : () => cargarPlanes(seleccionada!.id)
     );
     if (ok) setEditando(null);
@@ -139,7 +140,7 @@ export const AdminEpsScreen: React.FC<AdminEpsScreenProps> = ({ onNavigate }) =>
           headers: JSON_HEADERS,
           body: JSON.stringify({ activa: !x.activa })
         }),
-      x.activa ? 'EPS desactivada.' : 'EPS activada.',
+      x.activa ? t("EPS desactivada.") : t("EPS activada."),
       cargarEps
     );
 
@@ -151,7 +152,7 @@ export const AdminEpsScreen: React.FC<AdminEpsScreenProps> = ({ onNavigate }) =>
           headers: JSON_HEADERS,
           body: JSON.stringify({ activo: !p.activo })
         }),
-      p.activo ? 'Plan desactivado.' : 'Plan activado.',
+      p.activo ? t("Plan desactivado.") : t("Plan activado."),
       () => cargarPlanes(p.epsId)
     );
 
@@ -161,7 +162,7 @@ export const AdminEpsScreen: React.FC<AdminEpsScreenProps> = ({ onNavigate }) =>
         activo ? 'bg-emerald-100 text-emerald-900' : 'bg-gray-100 text-gray-700'
       }`}
     >
-      {activo ? 'Activo' : 'Inactivo'}
+      {activo ? t("Activo") : t("Inactivo")}
     </span>
   );
 
@@ -172,13 +173,13 @@ export const AdminEpsScreen: React.FC<AdminEpsScreenProps> = ({ onNavigate }) =>
           value={editando.nombre}
           onChange={(e) => setEditando({ ...editando, nombre: e.target.value })}
           className={`${inputClass} py-1`}
-          aria-label="Nuevo nombre"
+          aria-label={t("Nuevo nombre")}
           autoFocus
         />
-        <button type="button" onClick={guardarNombre} className="text-[#006066] p-1" aria-label="Guardar nombre">
+        <button type="button" onClick={guardarNombre} className="text-[#006066] p-1" aria-label={t("Guardar nombre")}>
           <span className="material-symbols-outlined text-[18px]">check</span>
         </button>
-        <button type="button" onClick={() => setEditando(null)} className="text-[#6e797a] p-1" aria-label="Cancelar edición">
+        <button type="button" onClick={() => setEditando(null)} className="text-[#6e797a] p-1" aria-label={t("Cancelar edición")}>
           <span className="material-symbols-outlined text-[18px]">close</span>
         </button>
       </span>
@@ -192,7 +193,9 @@ export const AdminEpsScreen: React.FC<AdminEpsScreenProps> = ({ onNavigate }) =>
             setEditando({ tipo, id, nombre });
           }}
           className="text-[#6e797a] hover:text-[#006066] p-0.5"
-          aria-label={`Renombrar ${nombre}`}
+          aria-label={t("Renombrar {nombre}", {
+            nombre: nombre
+          })}
         >
           <span className="material-symbols-outlined text-[16px]">edit</span>
         </button>
@@ -206,11 +209,13 @@ export const AdminEpsScreen: React.FC<AdminEpsScreenProps> = ({ onNavigate }) =>
       <div className="pb-5 border-b border-[#eff4ff]">
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#dce9ff] text-[#001c3a] text-[11px] font-bold tracking-wider uppercase mb-2">
           <span className="material-symbols-outlined text-[14px]">health_and_safety</span>
-          Catálogo de Aseguramiento
+          {t("Catálogo de Aseguramiento")}
         </span>
-        <h1 className="font-display text-2xl sm:text-3xl font-bold text-[#0d1c2e] tracking-tight">EPS y Planes</h1>
+        <h1 className="font-display text-2xl sm:text-3xl font-bold text-[#0d1c2e] tracking-tight">{t("EPS y Planes")}</h1>
         <p className="text-sm text-[#3e494a] mt-1 max-w-2xl">
-          Las EPS y planes inactivos dejan de ofrecerse a los pacientes, pero no se borran.
+          {t(
+            "Las EPS y planes inactivos dejan de ofrecerse a los pacientes, pero no se borran."
+          )}
         </p>
       </div>
 
@@ -238,7 +243,7 @@ export const AdminEpsScreen: React.FC<AdminEpsScreenProps> = ({ onNavigate }) =>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <section className="bg-white rounded-xl shadow-sm border border-[#e6eeff] p-5 space-y-4">
-            <h2 className="font-display font-semibold text-lg text-[#0d1c2e]">EPS</h2>
+            <h2 className="font-display font-semibold text-lg text-[#0d1c2e]">{t("EPS")}</h2>
             <ul className="divide-y divide-[#eff4ff]">
               {eps.map((x) => (
                 <li
@@ -259,39 +264,41 @@ export const AdminEpsScreen: React.FC<AdminEpsScreenProps> = ({ onNavigate }) =>
                     }}
                     className="text-[12px] font-semibold text-[#006066] hover:underline"
                   >
-                    {x.activa ? 'Desactivar' : 'Activar'}
+                    {x.activa ? t("Desactivar") : t("Activar")}
                   </button>
                 </li>
               ))}
-              {eps.length === 0 && <li className="py-3 text-sm text-[#6e797a]">No hay EPS registradas.</li>}
+              {eps.length === 0 && <li className="py-3 text-sm text-[#6e797a]">{t("No hay EPS registradas.")}</li>}
             </ul>
             <form onSubmit={crearEps} className="grid grid-cols-1 sm:grid-cols-[1fr_2fr_auto] gap-2 pt-3 border-t border-[#eff4ff]">
               <input
-                placeholder="Código"
-                aria-label="Código de la EPS"
+                placeholder={t("Código")}
+                aria-label={t("Código de la EPS")}
                 value={nuevaEps.codigo}
                 onChange={(e) => setNuevaEps({ ...nuevaEps, codigo: e.target.value })}
                 className={inputClass}
               />
               <input
-                placeholder="Nombre"
-                aria-label="Nombre de la EPS"
+                placeholder={t("Nombre")}
+                aria-label={t("Nombre de la EPS")}
                 value={nuevaEps.nombre}
                 onChange={(e) => setNuevaEps({ ...nuevaEps, nombre: e.target.value })}
                 className={inputClass}
               />
               <button type="submit" className="px-3 py-2 bg-[#006066] hover:bg-[#0d7a82] text-white text-sm font-semibold rounded-lg">
-                Crear EPS
+                {t("Crear EPS")}
               </button>
             </form>
           </section>
 
           <section className="bg-white rounded-xl shadow-sm border border-[#e6eeff] p-5 space-y-4">
             <h2 className="font-display font-semibold text-lg text-[#0d1c2e]">
-              Planes {seleccionada ? `de ${seleccionada.nombre}` : ''}
+              {t("Planes")} {seleccionada ? t("de {nombre}", {
+              nombre: seleccionada.nombre
+            }) : ''}
             </h2>
             {!seleccionada ? (
-              <p className="text-sm text-[#6e797a]">Selecciona una EPS para ver sus planes.</p>
+              <p className="text-sm text-[#6e797a]">{t("Selecciona una EPS para ver sus planes.")}</p>
             ) : (
               <>
                 <ul className="divide-y divide-[#eff4ff]">
@@ -306,15 +313,15 @@ export const AdminEpsScreen: React.FC<AdminEpsScreenProps> = ({ onNavigate }) =>
                         onClick={() => cambiarEstadoPlan(p)}
                         className="text-[12px] font-semibold text-[#006066] hover:underline"
                       >
-                        {p.activo ? 'Desactivar' : 'Activar'}
+                        {p.activo ? t("Desactivar") : t("Activar")}
                       </button>
                     </li>
                   ))}
-                  {planes.length === 0 && <li className="py-3 text-sm text-[#6e797a]">Esta EPS no tiene planes.</li>}
+                  {planes.length === 0 && <li className="py-3 text-sm text-[#6e797a]">{t("Esta EPS no tiene planes.")}</li>}
                 </ul>
                 <form onSubmit={crearPlan} className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-3 border-t border-[#eff4ff]">
                   <select
-                    aria-label="Régimen del plan"
+                    aria-label={t("Régimen del plan")}
                     value={nuevoPlan.regimenId}
                     onChange={(e) => setNuevoPlan({ ...nuevoPlan, regimenId: Number(e.target.value) })}
                     className={inputClass}
@@ -326,15 +333,15 @@ export const AdminEpsScreen: React.FC<AdminEpsScreenProps> = ({ onNavigate }) =>
                     ))}
                   </select>
                   <input
-                    placeholder="Código"
-                    aria-label="Código del plan"
+                    placeholder={t("Código")}
+                    aria-label={t("Código del plan")}
                     value={nuevoPlan.codigo}
                     onChange={(e) => setNuevoPlan({ ...nuevoPlan, codigo: e.target.value })}
                     className={inputClass}
                   />
                   <input
-                    placeholder="Nombre"
-                    aria-label="Nombre del plan"
+                    placeholder={t("Nombre")}
+                    aria-label={t("Nombre del plan")}
                     value={nuevoPlan.nombre}
                     onChange={(e) => setNuevoPlan({ ...nuevoPlan, nombre: e.target.value })}
                     className={`${inputClass} sm:col-span-2`}
@@ -343,7 +350,7 @@ export const AdminEpsScreen: React.FC<AdminEpsScreenProps> = ({ onNavigate }) =>
                     type="submit"
                     className="sm:col-span-2 px-3 py-2 bg-[#006066] hover:bg-[#0d7a82] text-white text-sm font-semibold rounded-lg"
                   >
-                    Crear plan
+                    {t("Crear plan")}
                   </button>
                 </form>
               </>

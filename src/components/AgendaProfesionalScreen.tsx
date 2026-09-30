@@ -4,6 +4,7 @@ import { ProfessionalNavTabs } from './ProfessionalNavTabs';
 import { HistorialCitaModal } from './HistorialCitaModal';
 import { CerrarAtencionModal } from './CerrarAtencionModal';
 import { API_URL, apiFetch } from '../api/session';
+import { t } from '../i18n';
 
 
 interface AgendaProfesionalScreenProps {
@@ -53,14 +54,16 @@ export const AgendaProfesionalScreen: React.FC<AgendaProfesionalScreenProps> = (
         apiFetch(`${API_URL}/api/professionals/me/agenda?${params.toString()}`, { headers: authHeaders }),
         apiFetch(`${API_URL}/api/specialties`, { headers: authHeaders })
       ]);
-      if (!respAgenda.ok || !respEsp.ok) throw new Error('No se pudo cargar la información.');
+      if (!respAgenda.ok || !respEsp.ok) throw new Error(t("No se pudo cargar la información."));
 
       const dataAgenda: CitaAgendaApi[] = await respAgenda.json();
       const dataEsp: SpecialtyApi[] = await respEsp.json();
       setCitas(dataAgenda);
       setSpecialties(dataEsp);
     } catch {
-      setLoadError('No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo.');
+      setLoadError(t(
+        "No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo."
+      ));
     } finally {
       setLoading(false);
     }
@@ -71,7 +74,9 @@ export const AgendaProfesionalScreen: React.FC<AgendaProfesionalScreenProps> = (
     cargar();
   }, [cargar]);
 
-  const nombreEspecialidad = (id: number) => specialties.find((s) => s.id === id)?.nombre ?? `Especialidad #${id}`;
+  const nombreEspecialidad = (id: number) => specialties.find((s) => s.id === id)?.nombre ?? t("Especialidad #{id}", {
+    id: id
+  });
 
   const citasOrdenadas = useMemo(() => [...citas].sort((a, b) => a.inicio.localeCompare(b.inicio)), [citas]);
 
@@ -81,8 +86,14 @@ export const AgendaProfesionalScreen: React.FC<AgendaProfesionalScreenProps> = (
 
   const handleCerrada = (resultado: CierreResponse) => {
     setAccionModal(null);
-    const etiqueta = resultado.estado === 'COMPLETED' ? 'completada' : 'marcada como no asistida';
-    setBanner({ tipo: 'success', texto: `Cita #${resultado.citaId} ${etiqueta}. Ya no aparece en tu agenda de citas aprobadas.` });
+    const etiqueta = resultado.estado === 'COMPLETED' ? 'completada' : t("marcada como no asistida");
+    setBanner({ tipo: 'success', texto: t(
+      "Cita #{citaId} {etiqueta}. Ya no aparece en tu agenda de citas aprobadas.",
+      {
+        citaId: resultado.citaId,
+        etiqueta: etiqueta
+      }
+    ) });
     cargar();
   };
 
@@ -100,12 +111,13 @@ export const AgendaProfesionalScreen: React.FC<AgendaProfesionalScreenProps> = (
         <div>
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#dce9ff] text-[#001c3a] text-[11px] font-bold tracking-wider uppercase mb-2">
             <span className="material-symbols-outlined text-[14px]">event_available</span>
-            Agenda del Profesional
+            {t("Agenda del Profesional")}
           </span>
-          <h1 className="font-display text-2xl sm:text-3xl font-bold text-[#0d1c2e] tracking-tight">Mi Agenda de Consultas</h1>
+          <h1 className="font-display text-2xl sm:text-3xl font-bold text-[#0d1c2e] tracking-tight">{t("Mi Agenda de Consultas")}</h1>
           <p className="text-sm text-[#3e494a] mt-1 max-w-2xl leading-relaxed">
-            Citas ambulatorias confirmadas (APPROVED) en HIC e ICV. Al cerrar una atención (completada o no
-            asistida) deja de aparecer aquí — no hay historial en esta pantalla.
+            {t(
+              "Citas ambulatorias confirmadas (APPROVED) en HIC e ICV. Al cerrar una atención (completada o no asistida) deja de aparecer aquí — no hay historial en esta pantalla."
+            )}
           </p>
         </div>
       </div>
@@ -132,13 +144,13 @@ export const AgendaProfesionalScreen: React.FC<AgendaProfesionalScreenProps> = (
       {loading ? (
         <div className="py-10 flex flex-col items-center text-center text-[#6e797a]">
           <span className="material-symbols-outlined text-[36px] text-[#0d7a82] animate-spin">progress_activity</span>
-          <p className="text-sm mt-3">Cargando tu agenda...</p>
+          <p className="text-sm mt-3">{t("Cargando tu agenda...")}</p>
         </div>
       ) : loadError ? (
         <div className="rounded-xl p-6 bg-[#ffdad6] text-[#93000a] border border-[#ba1a1a]/20 flex items-start gap-4">
           <span className="material-symbols-outlined text-[28px]">wifi_off</span>
           <div>
-            <h3 className="font-bold">Error de Conexión</h3>
+            <h3 className="font-bold">{t("Error de Conexión")}</h3>
             <p className="text-sm mt-1">{loadError}</p>
           </div>
         </div>
@@ -151,7 +163,7 @@ export const AgendaProfesionalScreen: React.FC<AgendaProfesionalScreenProps> = (
               </div>
               <div>
                 <span className="font-display text-lg font-bold text-[#0d1c2e] block leading-tight">{citas.length}</span>
-                <span className="text-xs text-[#3e494a]">Citas en el rango</span>
+                <span className="text-xs text-[#3e494a]">{t("Citas en el rango")}</span>
               </div>
             </div>
             <div className="bg-white p-4 rounded-xl shadow-xs border border-[#e6eeff] flex items-center gap-3">
@@ -160,7 +172,7 @@ export const AgendaProfesionalScreen: React.FC<AgendaProfesionalScreenProps> = (
               </div>
               <div>
                 <span className="font-display text-lg font-bold text-[#0d1c2e] block leading-tight">{pendientesDeCierre}</span>
-                <span className="text-xs text-[#3e494a]">Pendientes de Cierre</span>
+                <span className="text-xs text-[#3e494a]">{t("Pendientes de Cierre")}</span>
               </div>
             </div>
             <div className="bg-white p-4 rounded-xl shadow-xs border border-[#e6eeff] flex items-center gap-3">
@@ -169,7 +181,7 @@ export const AgendaProfesionalScreen: React.FC<AgendaProfesionalScreenProps> = (
               </div>
               <div>
                 <span className="font-display text-lg font-bold text-[#0d1c2e] block leading-tight">{proximas}</span>
-                <span className="text-xs text-[#3e494a]">Próximas</span>
+                <span className="text-xs text-[#3e494a]">{t("Próximas")}</span>
               </div>
             </div>
           </div>
@@ -185,7 +197,7 @@ export const AgendaProfesionalScreen: React.FC<AgendaProfesionalScreenProps> = (
                     sedeFiltro === s ? 'bg-[#006066] text-white shadow-xs' : 'bg-[#e6eeff] text-[#3e494a] hover:bg-[#dce9ff]'
                   }`}
                 >
-                  {s === 'ALL' ? 'Todas las sedes' : SEDES[s].corto}
+                  {s === 'ALL' ? t("Todas las sedes") : SEDES[s].corto}
                 </button>
               ))}
             </div>
@@ -193,7 +205,7 @@ export const AgendaProfesionalScreen: React.FC<AgendaProfesionalScreenProps> = (
             <div className="flex items-center gap-2 flex-wrap">
               <input
                 type="date"
-                title="Desde"
+                title={t("Desde")}
                 value={desde}
                 onChange={(e) => setDesde(e.target.value)}
                 className="px-3 py-1.5 rounded-lg bg-white border border-[#d5e3fc] text-xs text-[#0d1c2e] focus:bg-[#eff4ff] focus:outline-none focus:ring-1 focus:ring-[#006066] transition-all shadow-xs"
@@ -201,7 +213,7 @@ export const AgendaProfesionalScreen: React.FC<AgendaProfesionalScreenProps> = (
               <span className="text-xs text-[#6e797a]">a</span>
               <input
                 type="date"
-                title="Hasta"
+                title={t("Hasta")}
                 value={hasta}
                 onChange={(e) => setHasta(e.target.value)}
                 className="px-3 py-1.5 rounded-lg bg-white border border-[#d5e3fc] text-xs text-[#0d1c2e] focus:bg-[#eff4ff] focus:outline-none focus:ring-1 focus:ring-[#006066] transition-all shadow-xs"
@@ -212,7 +224,7 @@ export const AgendaProfesionalScreen: React.FC<AgendaProfesionalScreenProps> = (
                 className="px-2.5 py-1.5 rounded-lg text-xs font-medium text-[#3e494a] hover:text-[#006066] hover:bg-[#e6eeff] transition-all flex items-center gap-1"
               >
                 <span className="material-symbols-outlined text-[16px]">restart_alt</span>
-                <span className="hidden md:inline">Limpiar</span>
+                <span className="hidden md:inline">{t("Limpiar")}</span>
               </button>
             </div>
           </div>
@@ -222,9 +234,9 @@ export const AgendaProfesionalScreen: React.FC<AgendaProfesionalScreenProps> = (
               <div className="w-16 h-16 rounded-full bg-[#eff4ff] text-[#6e797a] flex items-center justify-center mb-4">
                 <span className="material-symbols-outlined text-[32px]">event_busy</span>
               </div>
-              <h3 className="font-display font-semibold text-lg text-[#0d1c2e]">No hay citas programadas</h3>
+              <h3 className="font-display font-semibold text-lg text-[#0d1c2e]">{t("No hay citas programadas")}</h3>
               <p className="text-sm text-[#3e494a] mt-2 max-w-md">
-                No tienes citas aprobadas para los filtros seleccionados.
+                {t("No tienes citas aprobadas para los filtros seleccionados.")}
               </p>
             </div>
           ) : (
@@ -248,8 +260,8 @@ export const AgendaProfesionalScreen: React.FC<AgendaProfesionalScreenProps> = (
                         </div>
                         <div>
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-base text-[#0d1c2e] font-bold">Paciente #{cita.pacienteUsuarioId}</span>
-                            <span className="text-[11px] font-mono text-[#6e797a]">Cita #{cita.citaId}</span>
+                            <span className="text-base text-[#0d1c2e] font-bold">{t("Paciente #")}{cita.pacienteUsuarioId}</span>
+                            <span className="text-[11px] font-mono text-[#6e797a]">{t("Cita #")}{cita.citaId}</span>
                           </div>
                           <span className="font-semibold text-[#006066] text-sm">{nombreEspecialidad(cita.especialidadId)}</span>
                           <div className="flex items-center gap-2 text-[#3e494a] text-xs mt-1 flex-wrap">
@@ -273,19 +285,19 @@ export const AgendaProfesionalScreen: React.FC<AgendaProfesionalScreenProps> = (
                       className="self-start inline-flex items-center gap-1 text-xs font-semibold text-[#006066] hover:underline"
                     >
                       <span className="material-symbols-outlined text-[16px]">history</span>
-                      Ver historial
+                      {t("Ver historial")}
                     </button>
 
                     {yaFinalizo ? (
                       <div className="flex flex-col sm:flex-row items-center justify-end gap-2 pt-2 border-t border-[#e6eeff]">
-                        <span className="text-xs text-[#3e494a] mr-auto">Hora de fin ya transcurrida: confirma el resultado de la atención.</span>
+                        <span className="text-xs text-[#3e494a] mr-auto">{t("Hora de fin ya transcurrida: confirma el resultado de la atención.")}</span>
                         <button
                           type="button"
                           onClick={() => setAccionModal({ cita, accion: 'no-show' })}
                           className="w-full sm:w-auto px-4 py-2 rounded-lg bg-[#eff4ff] hover:bg-[#ffdad6] text-[#3e494a] hover:text-[#ba1a1a] text-sm font-semibold transition-all flex items-center justify-center gap-2 border border-[#e6eeff]"
                         >
                           <span className="material-symbols-outlined text-[20px] text-[#ba1a1a]">person_off</span>
-                          No Asistió
+                          {t("No Asistió")}
                         </button>
                         <button
                           type="button"
@@ -293,14 +305,14 @@ export const AgendaProfesionalScreen: React.FC<AgendaProfesionalScreenProps> = (
                           className="w-full sm:w-auto px-5 py-2 rounded-lg bg-[#0d7a82] hover:bg-[#006066] text-white text-sm font-semibold shadow-xs transition-all flex items-center justify-center gap-2"
                         >
                           <span className="material-symbols-outlined text-[20px]">check_circle</span>
-                          Marcar Completada
+                          {t("Marcar Completada")}
                         </button>
                       </div>
                     ) : (
                       <div className="p-2.5 rounded-lg bg-[#eff4ff] flex items-center gap-1.5 text-xs text-[#3e494a]">
                         <span className="material-symbols-outlined text-[#436088] text-[18px]">lock_clock</span>
-                        Las acciones de cierre se habilitan al finalizar la hora de la cita ({horaFin}).
-                      </div>
+                        {t("Las acciones de cierre se habilitan al finalizar la hora de la cita (")}{horaFin}).
+                                              </div>
                     )}
                   </article>
                 );

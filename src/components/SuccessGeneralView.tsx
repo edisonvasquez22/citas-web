@@ -1,6 +1,7 @@
 import React from 'react';
 import { UserSession } from '../types';
 import { ConfirmedBooking } from './BookingView';
+import { t } from '../i18n';
 
 interface SuccessGeneralViewProps {
   session: UserSession;
@@ -31,48 +32,49 @@ export const SuccessGeneralView: React.FC<SuccessGeneralViewProps> = ({
           </div>
 
           <span className="px-3.5 py-1 rounded-full bg-[#0d7a82]/10 text-[#006066] text-xs font-bold tracking-wide uppercase">
-            ¡Cita Médica Confirmada!
+            {t("¡Cita Médica Confirmada!")}
           </span>
 
           <h2 className="font-headline text-2xl sm:text-3xl font-bold text-[#0d1c2e] mt-2 mb-1.5">
-            Reserva Aprobada Exitosamente
+            {t("Reserva Aprobada Exitosamente")}
           </h2>
           <p className="text-sm text-[#3e494a] max-w-xl">
-            Tu cita de <strong>{booking.especialidadNombre}</strong> ha sido reservada y aprobada automáticamente en
-            el sistema central de agendas ambulatorias FCV.
+            {t("Tu cita de")} <strong>{booking.especialidadNombre}</strong> {t(
+              "ha sido reservada y aprobada automáticamente en el sistema central de agendas ambulatorias FCV."
+            )}
           </p>
 
           <div className="w-full bg-[#eff4ff] border border-[#dce9ff] rounded-xl p-5 sm:p-6 my-6 text-left grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <span className="text-[11px] text-[#6e797a] block uppercase font-bold tracking-wider">Código de Cita</span>
+              <span className="text-[11px] text-[#6e797a] block uppercase font-bold tracking-wider">{t("Código de Cita")}</span>
               <span className="text-lg font-headline text-[#006066] font-extrabold font-mono">#{result.citaId}</span>
             </div>
 
             <div>
-              <span className="text-[11px] text-[#6e797a] block uppercase font-bold tracking-wider">Paciente</span>
+              <span className="text-[11px] text-[#6e797a] block uppercase font-bold tracking-wider">{t("Paciente")}</span>
               <span className="text-sm font-semibold text-[#0d1c2e] block truncate">{session.email}</span>
             </div>
 
             <div>
-              <span className="text-[11px] text-[#6e797a] block uppercase font-bold tracking-wider">Sede</span>
+              <span className="text-[11px] text-[#6e797a] block uppercase font-bold tracking-wider">{t("Sede")}</span>
               <span className="text-sm font-medium text-[#0d1c2e] block">{booking.sedeNombre}</span>
             </div>
 
             <div>
-              <span className="text-[11px] text-[#6e797a] block uppercase font-bold tracking-wider">Fecha y Hora</span>
+              <span className="text-[11px] text-[#6e797a] block uppercase font-bold tracking-wider">{t("Fecha y Hora")}</span>
               <span className="text-sm font-medium text-[#0d1c2e] block">
                 {fecha} • {horaInicio} - {horaFin}
               </span>
             </div>
 
             <div>
-              <span className="text-[11px] text-[#6e797a] block uppercase font-bold tracking-wider">Profesional</span>
+              <span className="text-[11px] text-[#6e797a] block uppercase font-bold tracking-wider">{t("Profesional")}</span>
               <span className="text-sm font-medium text-[#0d1c2e] block">{booking.profesionalNombre}</span>
             </div>
 
             <div>
-              <span className="text-[11px] text-[#6e797a] block uppercase font-bold tracking-wider">Estado</span>
-              <span className="text-sm font-semibold text-[#006066] block">Aprobada</span>
+              <span className="text-[11px] text-[#6e797a] block uppercase font-bold tracking-wider">{t("Estado")}</span>
+              <span className="text-sm font-semibold text-[#006066] block">{t("Aprobada")}</span>
             </div>
           </div>
 
@@ -83,7 +85,7 @@ export const SuccessGeneralView: React.FC<SuccessGeneralViewProps> = ({
               className="w-full sm:flex-1 py-3 px-4 rounded-lg bg-[#0d7a82] hover:bg-[#006066] text-white text-sm font-semibold transition-all flex items-center justify-center gap-2 shadow-xs"
             >
               <span className="material-symbols-outlined text-[18px]">calendar_add_on</span>
-              Agendar Otra Cita
+              {t("Agendar Otra Cita")}
             </button>
 
             <button
@@ -92,7 +94,7 @@ export const SuccessGeneralView: React.FC<SuccessGeneralViewProps> = ({
               className="w-full sm:flex-1 py-3 px-4 rounded-lg bg-[#dce9ff] hover:bg-[#c9ddff] text-[#0d1c2e] text-sm font-semibold transition-all flex items-center justify-center gap-2"
             >
               <span className="material-symbols-outlined text-[18px]">home</span>
-              Volver al Inicio
+              {t("Volver al Inicio")}
             </button>
           </div>
         </div>

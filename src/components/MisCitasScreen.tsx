@@ -13,6 +13,7 @@ import { CancelarCitaModal } from './CancelarCitaModal';
 import { ReprogramarCitaModal } from './ReprogramarCitaModal';
 import { HistorialCitaModal } from './HistorialCitaModal';
 import { API_URL, apiFetch } from '../api/session';
+import { t } from '../i18n';
 
 
 interface MisCitasScreenProps {
@@ -78,7 +79,7 @@ export const MisCitasScreen: React.FC<MisCitasScreenProps> = ({ session, onNueva
         apiFetch(`${API_URL}/api/professionals`, { headers: authHeaders })
       ]);
       if (!respCitas.ok || !respEsp.ok || !respProf.ok) {
-        throw new Error('No se pudo cargar la información.');
+        throw new Error(t("No se pudo cargar la información."));
       }
       const dataCitas: MiCitaApi[] = await respCitas.json();
       const dataEsp: SpecialtyApi[] = await respEsp.json();
@@ -87,7 +88,9 @@ export const MisCitasScreen: React.FC<MisCitasScreenProps> = ({ session, onNueva
       setSpecialties(dataEsp);
       setProfessionals(dataProf);
     } catch {
-      setLoadError('No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo.');
+      setLoadError(t(
+        "No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo."
+      ));
     } finally {
       setLoading(false);
     }
@@ -98,8 +101,12 @@ export const MisCitasScreen: React.FC<MisCitasScreenProps> = ({ session, onNueva
     cargar();
   }, [cargar]);
 
-  const nombreEspecialidad = (id: number) => specialties.find((s) => s.id === id)?.nombre ?? `Especialidad #${id}`;
-  const nombreProfesional = (id: number) => professionals.find((p) => p.profesionalId === id)?.nombreCompleto ?? `Profesional #${id}`;
+  const nombreEspecialidad = (id: number) => specialties.find((s) => s.id === id)?.nombre ?? t("Especialidad #{id}", {
+    id: id
+  });
+  const nombreProfesional = (id: number) => professionals.find((p) => p.profesionalId === id)?.nombreCompleto ?? t("Profesional #{id}", {
+    id: id
+  });
 
   const citasFiltradas = useMemo(() => {
     return citas.filter((c) => {
@@ -119,7 +126,9 @@ export const MisCitasScreen: React.FC<MisCitasScreenProps> = ({ session, onNueva
 
   const handleCancelada = (resultado: CierreResponse) => {
     setCitaParaCancelar(null);
-    setBanner({ tipo: 'success', texto: `Cita #${resultado.citaId} cancelada. El cupo quedó liberado.` });
+    setBanner({ tipo: 'success', texto: t("Cita #{citaId} cancelada. El cupo quedó liberado.", {
+      citaId: resultado.citaId
+    }) });
     cargar();
   };
 
@@ -127,7 +136,12 @@ export const MisCitasScreen: React.FC<MisCitasScreenProps> = ({ session, onNueva
     setCitaParaReprogramar(null);
     setBanner({
       tipo: 'success',
-      texto: `Solicitud de reprogramación #${resultado.solicitudId} enviada. Tu cita actual sigue vigente hasta que la administración decida.`
+      texto: t(
+        "Solicitud de reprogramación #{solicitudId} enviada. Tu cita actual sigue vigente hasta que la administración decida.",
+        {
+          solicitudId: resultado.solicitudId
+        }
+      )
     });
     // Refresca desde el backend en vez de guardar el resultado solo en memoria: GET /api/appointments/mine ya
     // trae el desenlace real de la reprogramación (cita.reprogramacion), así que sobrevive a un recargo de página.
@@ -143,7 +157,7 @@ export const MisCitasScreen: React.FC<MisCitasScreenProps> = ({ session, onNueva
     return (
       <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 py-10 flex flex-col items-center text-center">
         <span className="material-symbols-outlined text-[36px] text-[#0d7a82] animate-spin">progress_activity</span>
-        <p className="text-sm text-[#3e494a] mt-3">Cargando tus citas...</p>
+        <p className="text-sm text-[#3e494a] mt-3">{t("Cargando tus citas...")}</p>
       </div>
     );
   }
@@ -154,7 +168,7 @@ export const MisCitasScreen: React.FC<MisCitasScreenProps> = ({ session, onNueva
         <div className="rounded-xl p-6 bg-[#ffdad6] text-[#93000a] border border-[#ba1a1a]/20 flex items-start gap-4">
           <span className="material-symbols-outlined text-[28px]">wifi_off</span>
           <div>
-            <h3 className="font-bold">Error de Conexión</h3>
+            <h3 className="font-bold">{t("Error de Conexión")}</h3>
             <p className="text-sm mt-1">{loadError}</p>
           </div>
         </div>
@@ -183,7 +197,7 @@ export const MisCitasScreen: React.FC<MisCitasScreenProps> = ({ session, onNueva
             type="button"
             onClick={() => setBanner(null)}
             className="opacity-70 hover:opacity-100 p-1 rounded-lg hover:bg-black/5"
-            title="Cerrar notificación"
+            title={t("Cerrar notificación")}
           >
             <span className="material-symbols-outlined text-[18px]">close</span>
           </button>
@@ -196,15 +210,16 @@ export const MisCitasScreen: React.FC<MisCitasScreenProps> = ({ session, onNueva
         className="self-start text-xs font-medium text-[#3e494a] hover:text-[#006066] flex items-center gap-1 transition-colors"
       >
         <span className="material-symbols-outlined text-[16px]">arrow_back</span>
-        <span>Volver al inicio</span>
+        <span>{t("Volver al inicio")}</span>
       </button>
 
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <h1 className="font-display text-2xl sm:text-3xl font-bold text-[#0d1c2e] tracking-tight">Mis Citas Médicas</h1>
+          <h1 className="font-display text-2xl sm:text-3xl font-bold text-[#0d1c2e] tracking-tight">{t("Mis Citas Médicas")}</h1>
           <p className="text-sm text-[#3e494a] max-w-3xl leading-relaxed">
-            Historial y seguimiento de tus consultas en el Hospital Internacional de Colombia (HIC) y el Instituto
-            Cardiovascular (ICV).
+            {t(
+              "Historial y seguimiento de tus consultas en el Hospital Internacional de Colombia (HIC) y el Instituto Cardiovascular (ICV)."
+            )}
           </p>
         </div>
 
@@ -214,7 +229,7 @@ export const MisCitasScreen: React.FC<MisCitasScreenProps> = ({ session, onNueva
           className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-semibold bg-gradient-to-r from-[#006066] to-[#0d7a82] text-white shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
         >
           <span className="material-symbols-outlined text-[20px]">add</span>
-          <span>Agendar Nueva Cita</span>
+          <span>{t("Agendar Nueva Cita")}</span>
         </button>
       </div>
 
@@ -225,7 +240,7 @@ export const MisCitasScreen: React.FC<MisCitasScreenProps> = ({ session, onNueva
           </div>
           <div>
             <span className="font-display text-lg font-bold text-[#0d1c2e] block leading-tight">{conteo('APPROVED')}</span>
-            <span className="text-xs text-[#3e494a]">Confirmadas</span>
+            <span className="text-xs text-[#3e494a]">{t("Confirmadas")}</span>
           </div>
         </div>
         <div className="bg-white p-4 rounded-xl shadow-xs border border-[#e6eeff] flex items-center gap-3">
@@ -234,7 +249,7 @@ export const MisCitasScreen: React.FC<MisCitasScreenProps> = ({ session, onNueva
           </div>
           <div>
             <span className="font-display text-lg font-bold text-[#0d1c2e] block leading-tight">{conteo('REQUESTED')}</span>
-            <span className="text-xs text-[#3e494a]">En Revisión</span>
+            <span className="text-xs text-[#3e494a]">{t("En Revisión")}</span>
           </div>
         </div>
         <div className="bg-white p-4 rounded-xl shadow-xs border border-[#e6eeff] flex items-center gap-3">
@@ -243,7 +258,7 @@ export const MisCitasScreen: React.FC<MisCitasScreenProps> = ({ session, onNueva
           </div>
           <div>
             <span className="font-display text-lg font-bold text-[#0d1c2e] block leading-tight">{conteo('COMPLETED')}</span>
-            <span className="text-xs text-[#3e494a]">Completadas</span>
+            <span className="text-xs text-[#3e494a]">{t("Completadas")}</span>
           </div>
         </div>
       </div>
@@ -256,8 +271,8 @@ export const MisCitasScreen: React.FC<MisCitasScreenProps> = ({ session, onNueva
               onClick={() => setEstadoFiltro('ALL')}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${estadoFiltro === 'ALL' ? 'bg-[#006066] text-white shadow-xs' : 'bg-[#e6eeff] text-[#3e494a] hover:bg-[#dce9ff]'}`}
             >
-              Todas ({citas.length})
-            </button>
+              {t("Todas (")}{citas.length})
+                          </button>
             {(Object.keys(ESTADO_LABEL) as EstadoCita[]).map((estado) => (
               <button
                 key={estado}
@@ -265,7 +280,7 @@ export const MisCitasScreen: React.FC<MisCitasScreenProps> = ({ session, onNueva
                 onClick={() => setEstadoFiltro(estado)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${estadoFiltro === estado ? 'bg-[#006066] text-white shadow-xs' : 'bg-[#e6eeff] text-[#3e494a] hover:bg-[#dce9ff]'}`}
               >
-                {ESTADO_LABEL[estado]} ({conteo(estado)})
+                {t(ESTADO_LABEL[estado])} ({conteo(estado)})
               </button>
             ))}
           </div>
@@ -275,7 +290,7 @@ export const MisCitasScreen: React.FC<MisCitasScreenProps> = ({ session, onNueva
               <span className="material-symbols-outlined text-[18px] text-[#3e494a] absolute left-3 pointer-events-none">calendar_month</span>
               <input
                 type="date"
-                title="Filtrar por fecha"
+                title={t("Filtrar por fecha")}
                 value={fechaFiltro}
                 onChange={(e) => setFechaFiltro(e.target.value)}
                 className="pl-9 pr-3 py-1.5 rounded-lg bg-white border border-[#d5e3fc] text-xs text-[#0d1c2e] focus:bg-[#eff4ff] focus:outline-none focus:ring-1 focus:ring-[#006066] transition-all w-full sm:w-auto shadow-xs"
@@ -284,11 +299,11 @@ export const MisCitasScreen: React.FC<MisCitasScreenProps> = ({ session, onNueva
             <button
               type="button"
               onClick={resetFiltros}
-              title="Limpiar filtros"
+              title={t("Limpiar filtros")}
               className="px-2.5 py-1.5 rounded-lg text-xs font-medium text-[#3e494a] hover:text-[#006066] hover:bg-[#e6eeff] transition-all flex items-center gap-1 shrink-0"
             >
               <span className="material-symbols-outlined text-[16px]">restart_alt</span>
-              <span className="hidden md:inline">Limpiar</span>
+              <span className="hidden md:inline">{t("Limpiar")}</span>
             </button>
           </div>
         </div>
@@ -300,12 +315,12 @@ export const MisCitasScreen: React.FC<MisCitasScreenProps> = ({ session, onNueva
             <span className="material-symbols-outlined text-[42px]">calendar_today</span>
           </div>
           <h3 className="font-display text-lg font-bold text-[#0d1c2e] mb-1">
-            {citas.length === 0 ? 'Aún no tienes citas agendadas' : 'Sin resultados para este filtro'}
+            {citas.length === 0 ? t("Aún no tienes citas agendadas") : t("Sin resultados para este filtro")}
           </h3>
           <p className="text-xs text-[#3e494a] max-w-md mb-6 leading-relaxed">
             {citas.length === 0
-              ? 'No se encontraron registros de citas activas en HIC ni en ICV.'
-              : 'Prueba con otro estado o limpia el filtro de fecha.'}
+              ? t("No se encontraron registros de citas activas en HIC ni en ICV.")
+              : t("Prueba con otro estado o limpia el filtro de fecha.")}
           </p>
           {citas.length === 0 && (
             <button
@@ -314,7 +329,7 @@ export const MisCitasScreen: React.FC<MisCitasScreenProps> = ({ session, onNueva
               className="px-6 py-2.5 rounded-xl text-xs font-semibold bg-[#006066] text-white shadow-md hover:bg-[#0d7a82] transition-all flex items-center gap-2"
             >
               <span className="material-symbols-outlined text-[20px]">add</span>
-              <span>Agendar Cita Médica Ahora</span>
+              <span>{t("Agendar Cita Médica Ahora")}</span>
             </button>
           )}
         </div>
@@ -347,9 +362,9 @@ export const MisCitasScreen: React.FC<MisCitasScreenProps> = ({ session, onNueva
                         <div className="flex items-center gap-2 flex-wrap mb-1">
                           <span className={`text-[11px] px-2.5 py-0.5 rounded-full font-semibold flex items-center gap-1 ${colores.badge}`}>
                             <span className={`w-1.5 h-1.5 rounded-full ${colores.punto}`}></span>
-                            {ESTADO_LABEL[cita.estado]} ({cita.estado})
+                            {t(ESTADO_LABEL[cita.estado])} ({cita.estado})
                           </span>
-                          <span className="text-[11px] text-[#3e494a]">Cita #{cita.citaId}</span>
+                          <span className="text-[11px] text-[#3e494a]">{t("Cita #")}{cita.citaId}</span>
                         </div>
                         <h3 className={`font-display text-lg font-bold text-[#0d1c2e] ${cita.estado === 'CANCELLED' ? 'line-through opacity-70' : ''}`}>
                           {nombreEspecialidad(cita.especialidadId)}
@@ -375,10 +390,10 @@ export const MisCitasScreen: React.FC<MisCitasScreenProps> = ({ session, onNueva
                     <div className="p-3 bg-amber-50/80 rounded-lg flex items-start gap-2.5 text-xs text-amber-950 border border-amber-200">
                       <span className="material-symbols-outlined text-[20px] text-amber-700 shrink-0 mt-0.5">hourglass_top</span>
                       <div className="flex-1">
-                        <span className="font-semibold block text-amber-900">Reprogramación en espera de aprobación</span>
+                        <span className="font-semibold block text-amber-900">{t("Reprogramación en espera de aprobación")}</span>
                         <p className="text-amber-800">
-                          Solicitud #{reprogramacion.solicitudId}: {formatFechaHora(reprogramacion.inicioSolicitado).fecha} ·{' '}
-                          {formatFechaHora(reprogramacion.inicioSolicitado).hora}. Tu cita actual sigue vigente.
+                          {t("Solicitud #")}{reprogramacion.solicitudId}: {formatFechaHora(reprogramacion.inicioSolicitado).fecha}·{' '}
+                          {formatFechaHora(reprogramacion.inicioSolicitado).hora}{t(". Tu cita actual sigue vigente.")}
                         </p>
                       </div>
                     </div>
@@ -388,9 +403,9 @@ export const MisCitasScreen: React.FC<MisCitasScreenProps> = ({ session, onNueva
                     <div className="p-3 bg-emerald-50/80 rounded-lg flex items-start gap-2.5 text-xs text-emerald-950 border border-emerald-200">
                       <span className="material-symbols-outlined text-[20px] text-emerald-700 shrink-0 mt-0.5">event_available</span>
                       <div className="flex-1">
-                        <span className="font-semibold block text-emerald-900">Reprogramación aprobada</span>
+                        <span className="font-semibold block text-emerald-900">{t("Reprogramación aprobada")}</span>
                         <p className="text-emerald-800">
-                          Solicitud #{reprogramacion.solicitudId}: tu cita quedó confirmada en el nuevo horario.
+                          {t("Solicitud #")}{reprogramacion.solicitudId}{t(": tu cita quedó confirmada en el nuevo horario.")}
                         </p>
                       </div>
                     </div>
@@ -400,10 +415,10 @@ export const MisCitasScreen: React.FC<MisCitasScreenProps> = ({ session, onNueva
                     <div className="p-3 bg-red-50/80 rounded-lg flex items-start gap-2.5 text-xs text-red-950 border border-red-200">
                       <span className="material-symbols-outlined text-[20px] text-[#ba1a1a] shrink-0 mt-0.5">report_problem</span>
                       <div className="flex-1">
-                        <span className="font-semibold block text-[#93000a]">Reprogramación rechazada</span>
+                        <span className="font-semibold block text-[#93000a]">{t("Reprogramación rechazada")}</span>
                         <p className="text-red-800">
-                          Solicitud #{reprogramacion.solicitudId}: tu cita conserva su horario original.
-                          {reprogramacion.motivoDecision && <> Motivo: {reprogramacion.motivoDecision}</>}
+                          {t("Solicitud #")}{reprogramacion.solicitudId}{t(": tu cita conserva su horario original.")}
+                          {reprogramacion.motivoDecision && <> {t("Motivo:")} {reprogramacion.motivoDecision}</>}
                         </p>
                       </div>
                     </div>
@@ -413,7 +428,7 @@ export const MisCitasScreen: React.FC<MisCitasScreenProps> = ({ session, onNueva
                     <div className="p-3 bg-red-50/80 rounded-lg flex items-start gap-2.5 text-xs text-red-950 border border-red-200">
                       <span className="material-symbols-outlined text-[20px] text-[#ba1a1a] shrink-0 mt-0.5">report_problem</span>
                       <div>
-                        <span className="font-semibold block text-[#93000a]">Motivo del rechazo:</span>
+                        <span className="font-semibold block text-[#93000a]">{t("Motivo del rechazo:")}</span>
                         <p className="text-red-800">{cita.motivoDecision}</p>
                       </div>
                     </div>
@@ -437,7 +452,7 @@ export const MisCitasScreen: React.FC<MisCitasScreenProps> = ({ session, onNueva
                         className="px-3.5 py-1.5 rounded-lg text-xs font-medium text-[#006066] bg-[#006066]/10 hover:bg-[#006066]/20 transition-all flex items-center gap-1.5"
                       >
                         <span className="material-symbols-outlined text-[18px]">edit_calendar</span>
-                        <span>Reprogramar</span>
+                        <span>{t("Reprogramar")}</span>
                       </button>
                     )}
                     <button
@@ -446,7 +461,7 @@ export const MisCitasScreen: React.FC<MisCitasScreenProps> = ({ session, onNueva
                       className="px-3.5 py-1.5 rounded-lg text-xs font-medium text-[#3e494a] hover:bg-[#eff4ff] transition-all flex items-center gap-1.5"
                     >
                       <span className="material-symbols-outlined text-[18px]">history</span>
-                      <span>Historial</span>
+                      <span>{t("Historial")}</span>
                     </button>
                     {puedeCancelar && (
                       <button
@@ -455,7 +470,7 @@ export const MisCitasScreen: React.FC<MisCitasScreenProps> = ({ session, onNueva
                         className="px-3.5 py-1.5 rounded-lg text-xs font-medium text-[#ba1a1a] hover:bg-[#ffdad6]/40 transition-all flex items-center gap-1.5"
                       >
                         <span className="material-symbols-outlined text-[18px]">cancel</span>
-                        <span>Cancelar</span>
+                        <span>{t("Cancelar")}</span>
                       </button>
                     )}
                   </div>

@@ -11,6 +11,7 @@ import {
 import { AdminNavTabs } from './AdminNavTabs';
 import { RechazarReprogramacionModal } from './RechazarReprogramacionModal';
 import { API_URL, apiFetch } from '../api/session';
+import { t } from '../i18n';
 
 
 interface BandejaReprogramacionesScreenProps {
@@ -55,10 +56,12 @@ export const BandejaReprogramacionesScreen: React.FC<BandejaReprogramacionesScre
       setSolicitudes(dataSol);
       setProfessionals(dataProf);
       if (isRefresh) {
-        setFeedback({ type: 'info', title: 'Bandeja actualizada', message: 'Se recargaron las solicitudes pendientes.' });
+        setFeedback({ type: 'info', title: t("Bandeja actualizada"), message: t("Se recargaron las solicitudes pendientes.") });
       }
     } catch {
-      setLoadError('No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo.');
+      setLoadError(t(
+        "No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo."
+      ));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -70,7 +73,9 @@ export const BandejaReprogramacionesScreen: React.FC<BandejaReprogramacionesScre
     cargar(false);
   }, [cargar]);
 
-  const nombreProfesional = (id: number) => professionals.find((p) => p.profesionalId === id)?.nombreCompleto ?? `Profesional #${id}`;
+  const nombreProfesional = (id: number) => professionals.find((p) => p.profesionalId === id)?.nombreCompleto ?? t("Profesional #{id}", {
+    id: id
+  });
 
   const solicitudesFiltradas = useMemo(
     () => solicitudes.filter((s) => sedeFiltro === 'ALL' || s.sedeSolicitadaId === sedeFiltro),
@@ -92,21 +97,30 @@ export const BandejaReprogramacionesScreen: React.FC<BandejaReprogramacionesScre
         setSolicitudes((prev) => prev.filter((s) => s.solicitudId !== solicitudId));
         setFeedback({
           type: 'info',
-          title: 'Solicitud ya no disponible',
-          message: `La solicitud #${solicitudId} ya fue resuelta (quizás por otro administrador). Se actualizó la bandeja.`
+          title: t("Solicitud ya no disponible"),
+          message: t(
+            "La solicitud #{solicitudId} ya fue resuelta (quizás por otro administrador). Se actualizó la bandeja.",
+            {
+              solicitudId: solicitudId
+            }
+          )
         });
         return;
       }
       if (!resp.ok) {
         const err: ApiErrorBody | null = await resp.json().catch(() => null);
-        setFeedback({ type: 'info', title: 'No se pudo aprobar', message: err?.message || 'Error de conexión con el servidor institucional.' });
+        setFeedback({ type: 'info', title: t("No se pudo aprobar"), message: err?.message || t("Error de conexión con el servidor institucional.") });
         return;
       }
 
       setSolicitudes((prev) => prev.filter((s) => s.solicitudId !== solicitudId));
-      setFeedback({ type: 'success', title: 'Reprogramación aprobada', message: `La solicitud #${solicitudId} quedó confirmada en el nuevo horario.` });
+      setFeedback({ type: 'success', title: t("Reprogramación aprobada"), message: t("La solicitud #{solicitudId} quedó confirmada en el nuevo horario.", {
+        solicitudId: solicitudId
+      }) });
     } catch {
-      setFeedback({ type: 'info', title: 'Error de Conexión', message: 'No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo.' });
+      setFeedback({ type: 'info', title: t("Error de Conexión"), message: t(
+        "No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo."
+      ) });
     } finally {
       setProcessingId(null);
     }
@@ -114,12 +128,22 @@ export const BandejaReprogramacionesScreen: React.FC<BandejaReprogramacionesScre
 
   const handleRechazada = (actualizado: SolicitudReprogramacionApi) => {
     setSolicitudes((prev) => prev.filter((s) => s.solicitudId !== actualizado.solicitudId));
-    setFeedback({ type: 'success', title: 'Reprogramación rechazada', message: `Solicitud #${actualizado.solicitudId} rechazada. La cita conserva su horario original.` });
+    setFeedback({ type: 'success', title: t("Reprogramación rechazada"), message: t(
+      "Solicitud #{solicitudId} rechazada. La cita conserva su horario original.",
+      {
+        solicitudId: actualizado.solicitudId
+      }
+    ) });
   };
 
   const handleStale = (solicitudId: number) => {
     setSolicitudes((prev) => prev.filter((s) => s.solicitudId !== solicitudId));
-    setFeedback({ type: 'info', title: 'Solicitud ya no disponible', message: `La solicitud #${solicitudId} ya fue resuelta por otro administrador. Se actualizó la bandeja.` });
+    setFeedback({ type: 'info', title: t("Solicitud ya no disponible"), message: t(
+      "La solicitud #{solicitudId} ya fue resuelta por otro administrador. Se actualizó la bandeja.",
+      {
+        solicitudId: solicitudId
+      }
+    ) });
   };
 
   return (
@@ -131,18 +155,20 @@ export const BandejaReprogramacionesScreen: React.FC<BandejaReprogramacionesScre
           <div className="flex items-center gap-3 flex-wrap mb-1.5">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#dce9ff] text-[#001c3a] text-[11px] font-bold tracking-wider uppercase">
               <span className="material-symbols-outlined text-[14px]">event_repeat</span>
-              Gestión Asistencial
+              {t("Gestión Asistencial")}
             </span>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#e6eeff] text-[#006066] text-[12px] font-bold">
               <span className="w-1.5 h-1.5 rounded-full bg-[#006066]"></span>
-              <span>{solicitudes.length} solicitudes</span>
+              <span>{t('{n} solicitudes', { n: solicitudes.length })}</span>
             </span>
           </div>
-          <h1 className="font-display text-2xl sm:text-3xl font-bold text-[#0d1c2e] tracking-tight">Bandeja de Reprogramaciones</h1>
+          <h1 className="font-display text-2xl sm:text-3xl font-bold text-[#0d1c2e] tracking-tight">{t("Bandeja de Reprogramaciones")}</h1>
           <p className="text-sm text-[#3e494a] mt-1 leading-relaxed">
-            Revisión de cambios de fecha, hora y sede solicitados por pacientes para citas ya aprobadas, en{' '}
-            <span className="font-semibold text-[#436088] font-mono text-[13px]">PENDING</span>.
-          </p>
+            {t(
+              "Revisión de cambios de fecha, hora y sede solicitados por pacientes para citas ya aprobadas, en"
+            )}{' '}
+            <span className="font-semibold text-[#436088] font-mono text-[13px]">{t("PENDING")}</span>.
+                      </p>
         </div>
         <button
           type="button"
@@ -151,7 +177,7 @@ export const BandejaReprogramacionesScreen: React.FC<BandejaReprogramacionesScre
           className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-white border border-[#bdc9ca]/70 hover:bg-[#eff4ff] text-[#0d1c2e] transition-all text-xs font-semibold shadow-xs disabled:opacity-60 shrink-0"
         >
           <span className={`material-symbols-outlined text-[16px] ${refreshing ? 'animate-spin' : ''}`}>sync</span>
-          Actualizar bandeja
+          {t("Actualizar bandeja")}
         </button>
       </div>
 
@@ -178,27 +204,27 @@ export const BandejaReprogramacionesScreen: React.FC<BandejaReprogramacionesScre
       {loading ? (
         <div className="bg-white rounded-xl shadow-sm border border-[#e6eeff] p-10 flex flex-col items-center text-center">
           <span className="material-symbols-outlined text-[36px] text-[#0d7a82] animate-spin">progress_activity</span>
-          <p className="text-sm text-[#3e494a] mt-3">Cargando la bandeja de reprogramaciones...</p>
+          <p className="text-sm text-[#3e494a] mt-3">{t("Cargando la bandeja de reprogramaciones...")}</p>
         </div>
       ) : loadError ? (
         <div className="rounded-xl p-6 bg-[#ffdad6] text-[#93000a] border border-[#ba1a1a]/20 flex items-start gap-4">
           <span className="material-symbols-outlined text-[28px]">wifi_off</span>
           <div>
-            <h3 className="font-bold">Error de Conexión</h3>
+            <h3 className="font-bold">{t("Error de Conexión")}</h3>
             <p className="text-sm mt-1">{loadError}</p>
           </div>
         </div>
       ) : (
         <>
           <div className="flex items-center gap-1.5 flex-wrap bg-white p-3 rounded-xl border border-[#e6eeff] shadow-xs">
-            <span className="text-[12px] font-semibold text-[#3e494a] mr-1">Filtrar por sede solicitada:</span>
+            <span className="text-[12px] font-semibold text-[#3e494a] mr-1">{t("Filtrar por sede solicitada:")}</span>
             <button
               type="button"
               onClick={() => setSedeFiltro('ALL')}
               className={`px-3 py-1 rounded-lg text-xs font-medium transition ${sedeFiltro === 'ALL' ? 'bg-[#006066] text-white shadow-xs' : 'bg-[#e6eeff] text-[#3e494a] hover:bg-[#dce9ff]'}`}
             >
-              Todas ({solicitudes.length})
-            </button>
+              {t("Todas (")}{solicitudes.length})
+                          </button>
             <button
               type="button"
               onClick={() => setSedeFiltro(1)}
@@ -221,12 +247,12 @@ export const BandejaReprogramacionesScreen: React.FC<BandejaReprogramacionesScre
                 <span className="material-symbols-outlined text-[28px]">check_circle</span>
               </div>
               <h3 className="font-display font-semibold text-base text-[#0d1c2e]">
-                {solicitudes.length === 0 ? 'No hay solicitudes de reprogramación pendientes' : 'Ninguna solicitud coincide con el filtro'}
+                {solicitudes.length === 0 ? t("No hay solicitudes de reprogramación pendientes") : t("Ninguna solicitud coincide con el filtro")}
               </h3>
               <p className="text-xs text-[#3e494a] max-w-md mt-1 leading-relaxed">
                 {solicitudes.length === 0
-                  ? 'Todas las solicitudes de cambio de horario han sido gestionadas.'
-                  : 'Prueba con otra sede o limpia el filtro.'}
+                  ? t("Todas las solicitudes de cambio de horario han sido gestionadas.")
+                  : t("Prueba con otra sede o limpia el filtro.")}
               </p>
             </div>
           ) : (
@@ -239,14 +265,14 @@ export const BandejaReprogramacionesScreen: React.FC<BandejaReprogramacionesScre
                     <div className="flex flex-col gap-2.5">
                       <div className="flex items-center justify-between gap-1">
                         <div className="flex items-center gap-1.5">
-                          <span className="font-display text-[16px] font-bold text-[#0d1c2e]">SOLICITUD #{s.solicitudId}</span>
+                          <span className="font-display text-[16px] font-bold text-[#0d1c2e]">{t("SOLICITUD #")}{s.solicitudId}</span>
                           <span className="text-[11px] text-[#3e494a] font-mono bg-[#e6eeff] px-1.5 py-0.5 rounded border border-[#e6eeff]">
-                            Cita #{s.citaId}
+                            {t("Cita #")}{s.citaId}
                           </span>
                         </div>
                         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[11px] font-semibold">
                           <span className="material-symbols-outlined text-[13px]">hourglass_empty</span>
-                          PENDING
+                          {t("PENDING")}
                         </span>
                       </div>
 
@@ -259,7 +285,7 @@ export const BandejaReprogramacionesScreen: React.FC<BandejaReprogramacionesScre
 
                       <div className="flex flex-col gap-1.5 pt-1">
                         <div className="p-2.5 rounded-lg bg-[#e6eeff] text-[#3e494a] flex flex-col gap-1 opacity-85">
-                          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#6e797a]">Horario Anterior (Agendado)</span>
+                          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#6e797a]">{t("Horario Anterior (Agendado)")}</span>
                           <div className="flex items-center gap-1.5 text-[12px] line-through text-[#6e797a]">
                             <span className="material-symbols-outlined text-[15px]">calendar_today</span>
                             <span>{formatFechaHora(s.inicioAnterior)}</span>
@@ -269,12 +295,12 @@ export const BandejaReprogramacionesScreen: React.FC<BandejaReprogramacionesScre
                         <div className="flex items-center justify-center py-0.5">
                           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#f8f9ff] text-[#006066] text-[11px] font-medium">
                             <span className="material-symbols-outlined text-[14px]">arrow_downward</span>
-                            Cambio solicitado por el paciente
+                            {t("Cambio solicitado por el paciente")}
                           </span>
                         </div>
 
                         <div className="p-2.5 rounded-lg bg-[#eff4ff] flex flex-col gap-1.5 border border-[#006066]/20">
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#006066]">Horario Propuesto (Nuevo)</span>
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#006066]">{t("Horario Propuesto (Nuevo)")}</span>
                           <div className="flex items-center gap-1.5 text-[15px] font-bold text-[#0d1c2e]">
                             <span className="material-symbols-outlined text-[19px] text-[#006066]">event_available</span>
                             <span>{formatFechaHora(s.inicioSolicitado)}</span>
@@ -282,7 +308,7 @@ export const BandejaReprogramacionesScreen: React.FC<BandejaReprogramacionesScre
                           <div className="flex items-center gap-1 text-[12px] text-[#3e494a] font-medium">
                             <span className="material-symbols-outlined text-[15px] text-[#006066]">domain</span>
                             <span>
-                              Sede solicitada: <strong className="text-[#0d1c2e]">{SEDES[s.sedeSolicitadaId].corto}</strong>
+                              {t("Sede solicitada:")} <strong className="text-[#0d1c2e]">{SEDES[s.sedeSolicitadaId].corto}</strong>
                             </span>
                           </div>
                         </div>
@@ -297,7 +323,7 @@ export const BandejaReprogramacionesScreen: React.FC<BandejaReprogramacionesScre
                         className="px-3 py-2.5 rounded-lg bg-[#ffdad6]/60 hover:bg-[#ffdad6] text-[#ba1a1a] text-[13px] font-semibold flex items-center justify-center gap-1.5 transition disabled:opacity-50"
                       >
                         <span className="material-symbols-outlined text-[18px]">cancel</span>
-                        Rechazar
+                        {t("Rechazar")}
                       </button>
                       <button
                         type="button"
@@ -306,7 +332,7 @@ export const BandejaReprogramacionesScreen: React.FC<BandejaReprogramacionesScre
                         className="px-3 py-2.5 rounded-lg bg-[#0d7a82] hover:bg-[#006066] text-white text-[13px] font-semibold flex items-center justify-center gap-1.5 shadow-xs transition disabled:opacity-50"
                       >
                         <span className="material-symbols-outlined text-[18px]">check_circle</span>
-                        {processingId === s.solicitudId ? 'Procesando...' : 'Aprobar'}
+                        {processingId === s.solicitudId ? 'Procesando...' : t("Aprobar")}
                       </button>
                     </div>
                   </div>

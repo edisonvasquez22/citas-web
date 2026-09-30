@@ -12,6 +12,7 @@ import {
 } from '../types';
 import { EmptyStateView } from './EmptyStateView';
 import { API_URL, apiFetch } from '../api/session';
+import { t } from '../i18n';
 
 
 export interface ConfirmedBooking {
@@ -75,7 +76,7 @@ export const BookingView: React.FC<BookingViewProps> = ({ session, onConfirmed }
           apiFetch(`${API_URL}/api/professionals`, { headers: authHeaders })
         ]);
         if (!respEsp.ok || !respProf.ok) {
-          throw new Error('No se pudo cargar el catálogo de especialidades/profesionales.');
+          throw new Error(t("No se pudo cargar el catálogo de especialidades/profesionales."));
         }
         const esp: SpecialtyApi[] = await respEsp.json();
         const prof: ProfessionalApi[] = await respProf.json();
@@ -85,7 +86,9 @@ export const BookingView: React.FC<BookingViewProps> = ({ session, onConfirmed }
         const primeraGeneral = esp.find((s) => s.activa && s.general);
         if (primeraGeneral) setSpecialtyId(primeraGeneral.id);
       } catch {
-        if (!cancelado) setCatalogError('No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo.');
+        if (!cancelado) setCatalogError(t(
+          "No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo."
+        ));
       } finally {
         if (!cancelado) setLoadingCatalogos(false);
       }
@@ -138,14 +141,14 @@ export const BookingView: React.FC<BookingViewProps> = ({ session, onConfirmed }
 
     apiFetch(`${API_URL}/api/availability?${params.toString()}`, { headers: authHeaders })
       .then(async (resp) => {
-        if (!resp.ok) throw new Error('No se pudo consultar la disponibilidad.');
+        if (!resp.ok) throw new Error(t("No se pudo consultar la disponibilidad."));
         return (await resp.json()) as HorarioDisponible[];
       })
       .then((data) => {
         if (!cancelado) setHorarios(data);
       })
       .catch(() => {
-        if (!cancelado) setAvailabilityError('No se pudo consultar la disponibilidad. Inténtalo de nuevo.');
+        if (!cancelado) setAvailabilityError(t("No se pudo consultar la disponibilidad. Inténtalo de nuevo."));
       })
       .finally(() => {
         if (!cancelado) setLoadingHorarios(false);
@@ -181,7 +184,7 @@ export const BookingView: React.FC<BookingViewProps> = ({ session, onConfirmed }
 
       if (resp.status === 409) {
         const err: ApiErrorBody = await resp.json();
-        setConfirmError(err.message || 'El horario seleccionado ya no está disponible. Elige otro turno.');
+        setConfirmError(err.message || t("El horario seleccionado ya no está disponible. Elige otro turno."));
         setSelectedHorario(null);
         // Refresca disponibilidad para que el turno ocupado desaparezca de la lista.
         setDate((d) => d);
@@ -189,11 +192,13 @@ export const BookingView: React.FC<BookingViewProps> = ({ session, onConfirmed }
       }
       if (resp.status === 400 || resp.status === 404) {
         const err: ApiErrorBody = await resp.json();
-        setConfirmError(err.message || 'No se pudo confirmar la cita.');
+        setConfirmError(err.message || t("No se pudo confirmar la cita."));
         return;
       }
       if (!resp.ok) {
-        setConfirmError('Error de conexión con el servidor institucional. Inténtalo de nuevo más tarde.');
+        setConfirmError(t(
+          "Error de conexión con el servidor institucional. Inténtalo de nuevo más tarde."
+        ));
         return;
       }
 
@@ -203,11 +208,13 @@ export const BookingView: React.FC<BookingViewProps> = ({ session, onConfirmed }
         result,
         sedeNombre: SEDES[sede].nombre,
         especialidadNombre: currentSpecialty.nombre,
-        profesionalNombre: doctor?.nombreCompleto ?? 'Profesional asignado',
+        profesionalNombre: doctor?.nombreCompleto ?? t("Profesional asignado"),
         tipo
       });
     } catch {
-      setConfirmError('No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo.');
+      setConfirmError(t(
+        "No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo."
+      ));
     } finally {
       setConfirming(false);
     }
@@ -217,7 +224,7 @@ export const BookingView: React.FC<BookingViewProps> = ({ session, onConfirmed }
     return (
       <div className="bg-white rounded-xl shadow-sm border border-[#e6eeff] p-10 flex flex-col items-center text-center">
         <span className="material-symbols-outlined text-[36px] text-[#0d7a82] animate-spin">progress_activity</span>
-        <p className="text-sm text-[#3e494a] mt-3">Cargando especialidades y profesionales disponibles...</p>
+        <p className="text-sm text-[#3e494a] mt-3">{t("Cargando especialidades y profesionales disponibles...")}</p>
       </div>
     );
   }
@@ -227,7 +234,7 @@ export const BookingView: React.FC<BookingViewProps> = ({ session, onConfirmed }
       <div className="rounded-xl p-6 bg-[#ffdad6] text-[#93000a] border border-[#ba1a1a]/20 flex items-start gap-4">
         <span className="material-symbols-outlined text-[28px]">wifi_off</span>
         <div>
-          <h3 className="font-bold">Error de Conexión</h3>
+          <h3 className="font-bold">{t("Error de Conexión")}</h3>
           <p className="text-sm mt-1">{catalogError}</p>
         </div>
       </div>
@@ -240,20 +247,22 @@ export const BookingView: React.FC<BookingViewProps> = ({ session, onConfirmed }
         <div>
           <span className="text-xs uppercase tracking-wider text-[#0d7a82] font-semibold flex items-center gap-1.5 mb-1">
             <span className="material-symbols-outlined text-[18px]">calendar_add_on</span>
-            MÓDULO AMBULATORIO
+            {t("MÓDULO AMBULATORIO")}
           </span>
           <h1 className="font-headline text-2xl sm:text-3xl font-bold text-[#0d1c2e] tracking-tight">
-            Agendar Nueva Cita Médica
+            {t("Agendar Nueva Cita Médica")}
           </h1>
           <p className="text-sm text-[#3e494a] mt-1">
-            Red Integrada Santander:{' '}
-            <strong className="text-[#0d1c2e]">Hospital Internacional de Colombia (HIC)</strong> en Piedecuesta &{' '}
-            <strong className="text-[#0d1c2e]">Instituto Cardiovascular (ICV)</strong> en Floridablanca.
+            {t("Red Integrada Santander:")}{' '}
+            <strong className="text-[#0d1c2e]">{t("Hospital Internacional de Colombia (HIC)")}</strong> {t("en Piedecuesta &")}{' '}
+            <strong className="text-[#0d1c2e]">{t("Instituto Cardiovascular (ICV)")}</strong> {t("en Floridablanca.")}
           </p>
         </div>
         <div className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-[#eff4ff] border border-[#dce9ff] text-[#3e494a] text-xs">
           <span className="material-symbols-outlined text-[#0d7a82] text-[20px] shrink-0">info</span>
-          <span>Citas generales con aprobación inmediata; especialistas sujetas a verificación médica.</span>
+          <span>{t(
+            "Citas generales con aprobación inmediata; especialistas sujetas a verificación médica."
+          )}</span>
         </div>
       </div>
 
@@ -266,14 +275,14 @@ export const BookingView: React.FC<BookingViewProps> = ({ session, onConfirmed }
               <div className="flex items-center justify-between pb-3 border-b border-[#eff4ff]">
                 <div className="flex items-center gap-2">
                   <span className="material-symbols-outlined text-[#0d7a82] text-[20px]">tune</span>
-                  <span className="font-semibold text-base text-[#0d1c2e]">Criterios de Atención</span>
+                  <span className="font-semibold text-base text-[#0d1c2e]">{t("Criterios de Atención")}</span>
                 </div>
-                <span className="text-xs text-[#6e797a]">Paso 1 de 2: Definir consulta</span>
+                <span className="text-xs text-[#6e797a]">{t("Paso 1 de 2: Definir consulta")}</span>
               </div>
 
               {/* Sede */}
               <div>
-                <label className="block text-sm font-semibold text-[#0d1c2e] mb-2.5">Sede Hospitalaria</label>
+                <label className="block text-sm font-semibold text-[#0d1c2e] mb-2.5">{t("Sede Hospitalaria")}</label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {([1, 2] as SedeId[]).map((sedeId) => (
                     <button
@@ -308,7 +317,7 @@ export const BookingView: React.FC<BookingViewProps> = ({ session, onConfirmed }
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="tipo-cita-select" className="block text-sm font-semibold text-[#0d1c2e] mb-1.5">
-                    Tipo de Cita
+                    {t("Tipo de Cita")}
                   </label>
                   <select
                     id="tipo-cita-select"
@@ -316,20 +325,20 @@ export const BookingView: React.FC<BookingViewProps> = ({ session, onConfirmed }
                     onChange={(e) => handleTipoChange(e.target.value as CitaTipo)}
                     className="w-full bg-[#eff4ff] border border-[#bdc9ca]/60 px-3.5 py-2.5 rounded-lg text-sm text-[#0d1c2e] font-medium focus:outline-none focus:ring-2 focus:ring-[#0d7a82] focus:bg-white transition-all cursor-pointer"
                   >
-                    <option value="GENERAL">Medicina General (30 min • Directa)</option>
-                    <option value="ESPECIALIZADA">Consulta Especializada (60 min • Validación)</option>
+                    <option value="GENERAL">{t("Medicina General (30 min • Directa)")}</option>
+                    <option value="ESPECIALIZADA">{t("Consulta Especializada (60 min • Validación)")}</option>
                   </select>
                   <p className="text-xs text-[#006066] mt-1.5 flex items-center gap-1 font-medium">
                     <span className="material-symbols-outlined text-[15px]">{tipo === 'GENERAL' ? 'bolt' : 'history_edu'}</span>
                     {tipo === 'GENERAL'
-                      ? 'Confirmación instantánea en 1 franja de 30m.'
-                      : 'Turno de 60 min. Sujeto a validación médica.'}
+                      ? t("Confirmación instantánea en 1 franja de 30m.")
+                      : t("Turno de 60 min. Sujeto a validación médica.")}
                   </p>
                 </div>
 
                 <div>
                   <label htmlFor="specialty-select" className="block text-sm font-semibold text-[#0d1c2e] mb-1.5">
-                    Especialidad
+                    {t("Especialidad")}
                   </label>
                   <select
                     id="specialty-select"
@@ -337,10 +346,10 @@ export const BookingView: React.FC<BookingViewProps> = ({ session, onConfirmed }
                     onChange={(e) => handleSpecialtyChange(Number(e.target.value))}
                     className="w-full bg-[#eff4ff] border border-[#bdc9ca]/60 px-3.5 py-2.5 rounded-lg text-sm text-[#0d1c2e] font-medium focus:outline-none focus:ring-2 focus:ring-[#0d7a82] focus:bg-white transition-all cursor-pointer"
                   >
-                    {filteredSpecialties.length === 0 && <option value="">Sin especialidades disponibles</option>}
+                    {filteredSpecialties.length === 0 && <option value="">{t("Sin especialidades disponibles")}</option>}
                     {filteredSpecialties.map((spec) => (
                       <option key={spec.id} value={spec.id}>
-                        {spec.nombre} ({spec.duracionMinutos} min)
+                        {spec.nombre}({spec.duracionMinutos} {t("min)")}
                       </option>
                     ))}
                   </select>
@@ -351,7 +360,7 @@ export const BookingView: React.FC<BookingViewProps> = ({ session, onConfirmed }
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="doctor-select" className="block text-sm font-semibold text-[#0d1c2e] mb-1.5">
-                    Profesional
+                    {t("Profesional")}
                   </label>
                   <select
                     id="doctor-select"
@@ -363,7 +372,7 @@ export const BookingView: React.FC<BookingViewProps> = ({ session, onConfirmed }
                     }}
                     className="w-full bg-[#eff4ff] border border-[#bdc9ca]/60 px-3.5 py-2.5 rounded-lg text-sm text-[#0d1c2e] font-medium focus:outline-none focus:ring-2 focus:ring-[#0d7a82] focus:bg-white transition-all cursor-pointer"
                   >
-                    <option value="ANY">Cualquier profesional disponible</option>
+                    <option value="ANY">{t("Cualquier profesional disponible")}</option>
                     {doctorsForFilter.map((doc) => (
                       <option key={doc.profesionalId} value={doc.profesionalId}>
                         {doc.nombreCompleto}
@@ -372,14 +381,14 @@ export const BookingView: React.FC<BookingViewProps> = ({ session, onConfirmed }
                   </select>
                   {doctorsForFilter.length === 0 && (
                     <p className="text-[11px] text-[#6e797a] mt-1.5">
-                      No hay profesionales registrados para esa especialidad en esta sede.
+                      {t("No hay profesionales registrados para esa especialidad en esta sede.")}
                     </p>
                   )}
                 </div>
 
                 <div>
                   <label htmlFor="date-input" className="block text-sm font-semibold text-[#0d1c2e] mb-1.5">
-                    Fecha Preferida
+                    {t("Fecha Preferida")}
                   </label>
                   <div className="relative flex items-center">
                     <span className="material-symbols-outlined absolute left-3 text-[#6e797a] text-[18px] pointer-events-none">
@@ -400,14 +409,14 @@ export const BookingView: React.FC<BookingViewProps> = ({ session, onConfirmed }
               {/* Motivo opcional */}
               <div>
                 <label htmlFor="motivo-input" className="block text-sm font-semibold text-[#0d1c2e] mb-1.5">
-                  Motivo de la consulta (opcional)
+                  {t("Motivo de la consulta (opcional)")}
                 </label>
                 <textarea
                   id="motivo-input"
                   value={motivo}
                   onChange={(e) => setMotivo(e.target.value)}
                   rows={2}
-                  placeholder="Ej: control de rutina, dolor torácico, seguimiento..."
+                  placeholder={t("Ej: control de rutina, dolor torácico, seguimiento...")}
                   className="w-full bg-[#eff4ff] border border-[#bdc9ca]/60 px-3.5 py-2.5 rounded-lg text-sm text-[#0d1c2e] focus:outline-none focus:ring-2 focus:ring-[#0d7a82] focus:bg-white transition-all resize-none"
                 />
               </div>
@@ -418,8 +427,8 @@ export const BookingView: React.FC<BookingViewProps> = ({ session, onConfirmed }
           <div className="bg-white rounded-xl shadow-sm border border-[#e6eeff] p-5 sm:p-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[#eff4ff]">
               <div>
-                <h2 className="font-headline text-lg sm:text-xl font-bold text-[#0d1c2e]">Horarios Disponibles</h2>
-                <p className="text-xs text-[#6e797a] mt-0.5">{date} en {SEDES[sede].corto}</p>
+                <h2 className="font-headline text-lg sm:text-xl font-bold text-[#0d1c2e]">{t("Horarios Disponibles")}</h2>
+                <p className="text-xs text-[#6e797a] mt-0.5">{t('{date} en {sede}', { date, sede: SEDES[sede].corto })}</p>
               </div>
             </div>
 
@@ -427,8 +436,9 @@ export const BookingView: React.FC<BookingViewProps> = ({ session, onConfirmed }
               <div className="mt-4 p-3.5 rounded-xl bg-[#00798e]/10 border border-[#00798e]/25 text-[#005f6f] flex items-start gap-3">
                 <span className="material-symbols-outlined text-[20px] shrink-0 mt-0.5 text-[#00798e]">find_replace</span>
                 <div className="text-xs leading-relaxed">
-                  <strong className="font-semibold">Consulta especializada:</strong> la solicitud queda pendiente de
-                  aprobación médica; el horario elegido queda retenido mientras se decide.
+                  <strong className="font-semibold">{t("Consulta especializada:")}</strong> {t(
+                    "la solicitud queda pendiente de aprobación médica; el horario elegido queda retenido mientras se decide."
+                  )}
                 </div>
               </div>
             )}
@@ -436,7 +446,7 @@ export const BookingView: React.FC<BookingViewProps> = ({ session, onConfirmed }
             {loadingHorarios && (
               <div className="py-10 flex flex-col items-center text-center text-[#6e797a]">
                 <span className="material-symbols-outlined text-[30px] text-[#0d7a82] animate-spin">progress_activity</span>
-                <p className="text-xs mt-2">Consultando disponibilidad real...</p>
+                <p className="text-xs mt-2">{t("Consultando disponibilidad real...")}</p>
               </div>
             )}
 
@@ -485,7 +495,9 @@ export const BookingView: React.FC<BookingViewProps> = ({ session, onConfirmed }
                       </span>
                       {doctorId === 'ANY' && (
                         <span className={`text-[11px] mt-0.5 truncate max-w-full ${isSelected ? 'text-white/90' : 'text-[#6e797a]'}`}>
-                          {doctor?.nombreCompleto ?? `Profesional #${h.profesionalId}`}
+                          {doctor?.nombreCompleto ?? t("Profesional #{profesionalId}", {
+                            profesionalId: h.profesionalId
+                          })}
                         </span>
                       )}
                     </button>
@@ -502,13 +514,13 @@ export const BookingView: React.FC<BookingViewProps> = ({ session, onConfirmed }
             <div className="h-2 w-full bg-gradient-to-r from-[#0d7a82] via-[#00798e] to-[#35527a]"></div>
             <div className="p-5 sm:p-6 flex flex-col gap-4">
               <div className="flex items-center justify-between pb-3 border-b border-[#eff4ff]">
-                <span className="font-headline font-bold text-base text-[#0d1c2e]">Resumen de Cita</span>
+                <span className="font-headline font-bold text-base text-[#0d1c2e]">{t("Resumen de Cita")}</span>
                 <span
                   className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${
                     selectedHorario ? 'bg-[#0d7a82]/15 text-[#006066]' : 'bg-[#eff4ff] text-[#6e797a]'
                   }`}
                 >
-                  {selectedHorario ? 'Turno Listo' : 'Sin Seleccionar'}
+                  {selectedHorario ? t("Turno Listo") : t("Sin Seleccionar")}
                 </span>
               </div>
 
@@ -517,7 +529,7 @@ export const BookingView: React.FC<BookingViewProps> = ({ session, onConfirmed }
                   <span className="material-symbols-outlined text-[18px]">pin_drop</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <span className="text-[11px] text-[#6e797a] uppercase block tracking-wider font-semibold">Sede</span>
+                  <span className="text-[11px] text-[#6e797a] uppercase block tracking-wider font-semibold">{t("Sede")}</span>
                   <span className="text-sm font-semibold text-[#0d1c2e] block truncate">{SEDES[sede].nombre}</span>
                 </div>
               </div>
@@ -527,7 +539,7 @@ export const BookingView: React.FC<BookingViewProps> = ({ session, onConfirmed }
                   <span className="material-symbols-outlined text-[18px]">medical_services</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <span className="text-[11px] text-[#6e797a] uppercase block tracking-wider font-semibold">Especialidad</span>
+                  <span className="text-[11px] text-[#6e797a] uppercase block tracking-wider font-semibold">{t("Especialidad")}</span>
                   <span className="text-sm font-semibold text-[#0d1c2e] block truncate">
                     {currentSpecialty?.nombre ?? '—'}
                   </span>
@@ -540,13 +552,13 @@ export const BookingView: React.FC<BookingViewProps> = ({ session, onConfirmed }
                 </div>
                 <div className="flex-1 min-w-0">
                   <span className="text-[11px] text-[#6e797a] uppercase block tracking-wider font-semibold">
-                    Fecha & Franja
+                    {t("Fecha & Franja")}
                   </span>
                   <span className="text-sm sm:text-base font-bold text-[#006066] block">
                     {selectedHorario ? (
                       <>{date} • {horaHHmm(selectedHorario.inicio)} - {horaHHmm(selectedHorario.fin)}</>
                     ) : (
-                      'Seleccione un turno'
+                      t("Seleccione un turno")
                     )}
                   </span>
                 </div>
@@ -567,12 +579,12 @@ export const BookingView: React.FC<BookingViewProps> = ({ session, onConfirmed }
                   className="w-full py-3 px-4 rounded-lg bg-[#0d7a82] hover:bg-[#006066] text-white font-semibold text-sm sm:text-base transition-all shadow-sm flex items-center justify-center gap-2 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <span className="material-symbols-outlined text-[20px]">calendar_month</span>
-                  <span>{confirming ? 'Confirmando...' : 'Confirmar Cita Médica'}</span>
+                  <span>{confirming ? 'Confirmando...' : t("Confirmar Cita Médica")}</span>
                 </button>
               </div>
 
               <div className="text-center text-[11px] text-[#6e797a]">
-                Protección de datos conforme a Ley 1581 de 2012
+                {t("Protección de datos conforme a Ley 1581 de 2012")}
               </div>
             </div>
           </div>

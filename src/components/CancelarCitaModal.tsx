@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ApiErrorBody, CierreResponse, MiCitaApi, UserSession } from '../types';
 import { API_URL, apiFetch } from '../api/session';
+import { t } from '../i18n';
 
 
 interface CancelarCitaModalProps {
@@ -33,18 +34,22 @@ export const CancelarCitaModal: React.FC<CancelarCitaModalProps> = ({
 
       if (resp.status === 409 || resp.status === 400) {
         const err: ApiErrorBody = await resp.json();
-        setError(err.message || 'Esta cita ya no se puede cancelar.');
+        setError(err.message || t("Esta cita ya no se puede cancelar."));
         return;
       }
       if (!resp.ok) {
-        setError('No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo.');
+        setError(t(
+          "No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo."
+        ));
         return;
       }
 
       const resultado: CierreResponse = await resp.json();
       onCancelada(resultado);
     } catch {
-      setError('No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo.');
+      setError(t(
+        "No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo."
+      ));
     } finally {
       setEnviando(false);
     }
@@ -65,39 +70,39 @@ export const CancelarCitaModal: React.FC<CancelarCitaModalProps> = ({
             </div>
             <div>
               <h2 id="cancel-modal-title" className="font-display text-lg font-bold text-[#0d1c2e]">
-                Cancelar Cita Médica
+                {t("Cancelar Cita Médica")}
               </h2>
-              <p className="text-xs text-[#3e494a]">Se liberará el cupo en el sistema central</p>
+              <p className="text-xs text-[#3e494a]">{t("Se liberará el cupo en el sistema central")}</p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
             className="text-[#3e494a] hover:text-[#0d1c2e] p-1.5 rounded-lg hover:bg-[#dce9ff] transition-colors"
-            title="Cerrar ventana"
+            title={t("Cerrar ventana")}
           >
             <span className="material-symbols-outlined text-[20px]">close</span>
           </button>
         </div>
 
         <div className="p-6 flex flex-col gap-4">
-          <p className="text-sm text-[#0d1c2e]">¿Estás seguro de que deseas cancelar la siguiente cita?</p>
+          <p className="text-sm text-[#0d1c2e]">{t("¿Estás seguro de que deseas cancelar la siguiente cita?")}</p>
 
           <div className="p-4 rounded-xl bg-[#f8f9ff] border border-[#e6eeff] flex flex-col gap-2 text-xs">
             <div className="flex justify-between items-start">
-              <span className="text-[#3e494a]">Especialidad:</span>
+              <span className="text-[#3e494a]">{t("Especialidad:")}</span>
               <span className="font-semibold text-[#0d1c2e] text-right">{resumen.especialidadNombre}</span>
             </div>
             <div className="flex justify-between items-start">
-              <span className="text-[#3e494a]">Profesional:</span>
+              <span className="text-[#3e494a]">{t("Profesional:")}</span>
               <span className="font-medium text-[#0d1c2e] text-right">{resumen.profesionalNombre}</span>
             </div>
             <div className="flex justify-between items-start">
-              <span className="text-[#3e494a]">Sede:</span>
+              <span className="text-[#3e494a]">{t("Sede:")}</span>
               <span className="text-[#0d1c2e] text-right max-w-xs">{resumen.sedeNombre}</span>
             </div>
             <div className="flex justify-between items-center pt-1 border-t border-[#e6eeff]">
-              <span className="text-[#3e494a]">Fecha &amp; Hora:</span>
+              <span className="text-[#3e494a]">{t("Fecha & Hora:")}</span>
               <span className="font-bold text-[#006066]">
                 {cita.inicio.replace('T', ' ').slice(0, 16)}
               </span>
@@ -114,8 +119,9 @@ export const CancelarCitaModal: React.FC<CancelarCitaModalProps> = ({
           <div className="p-3 bg-amber-50 rounded-xl flex items-start gap-2.5 text-xs text-amber-950 border border-amber-200">
             <span className="material-symbols-outlined text-[20px] text-amber-700 shrink-0 mt-0.5">warning</span>
             <p className="text-amber-900 leading-snug">
-              Esta acción libera de inmediato tu turno. Una vez cancelada, el cupo queda disponible para otros
-              pacientes y no puede reactivarse.
+              {t(
+                "Esta acción libera de inmediato tu turno. Una vez cancelada, el cupo queda disponible para otros pacientes y no puede reactivarse."
+              )}
             </p>
           </div>
         </div>
@@ -127,7 +133,7 @@ export const CancelarCitaModal: React.FC<CancelarCitaModalProps> = ({
             disabled={enviando}
             className="px-4 py-2 rounded-xl text-xs font-medium text-[#436088] hover:bg-[#dce9ff] transition-colors disabled:opacity-50"
           >
-            Conservar Cita
+            {t("Conservar Cita")}
           </button>
           <button
             type="button"
@@ -138,12 +144,12 @@ export const CancelarCitaModal: React.FC<CancelarCitaModalProps> = ({
             {enviando ? (
               <>
                 <span className="material-symbols-outlined text-[16px] animate-spin">refresh</span>
-                <span>Procesando...</span>
+                <span>{t("Procesando...")}</span>
               </>
             ) : (
               <>
                 <span className="material-symbols-outlined text-[16px]">check</span>
-                <span>Sí, Cancelar Cita</span>
+                <span>{t("Sí, Cancelar Cita")}</span>
               </>
             )}
           </button>

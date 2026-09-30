@@ -9,6 +9,7 @@ import {
   UserSession
 } from '../types';
 import { API_URL, apiFetch } from '../api/session';
+import { t } from '../i18n';
 
 
 interface ReprogramarCitaModalProps {
@@ -79,7 +80,7 @@ export const ReprogramarCitaModal: React.FC<ReprogramarCitaModalProps> = ({
         if (!cancelado) setHorarios(data);
       })
       .catch(() => {
-        if (!cancelado) setAvailabilityError('No se pudo consultar la disponibilidad. Inténtalo de nuevo.');
+        if (!cancelado) setAvailabilityError(t("No se pudo consultar la disponibilidad. Inténtalo de nuevo."));
       })
       .finally(() => {
         if (!cancelado) setLoadingHorarios(false);
@@ -111,25 +112,29 @@ export const ReprogramarCitaModal: React.FC<ReprogramarCitaModalProps> = ({
 
       if (resp.status === 409) {
         const err: ApiErrorBody = await resp.json();
-        setError(err.message || 'El horario seleccionado ya no está disponible. Elige otro turno.');
+        setError(err.message || t("El horario seleccionado ya no está disponible. Elige otro turno."));
         setSeleccionado(null);
         setFecha((f) => f);
         return;
       }
       if (resp.status === 400 || resp.status === 404) {
         const err: ApiErrorBody = await resp.json();
-        setError(err.message || 'No se pudo solicitar la reprogramación.');
+        setError(err.message || t("No se pudo solicitar la reprogramación."));
         return;
       }
       if (!resp.ok) {
-        setError('No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo.');
+        setError(t(
+          "No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo."
+        ));
         return;
       }
 
       const resultado: ReprogramarResponse = await resp.json();
       onReprogramada(resultado);
     } catch {
-      setError('No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo.');
+      setError(t(
+        "No se pudo contactar al servidor institucional. Verifica tu conexión e inténtalo de nuevo."
+      ));
     } finally {
       setEnviando(false);
     }
@@ -150,7 +155,7 @@ export const ReprogramarCitaModal: React.FC<ReprogramarCitaModalProps> = ({
             </div>
             <div>
               <h2 id="reschedule-modal-title" className="font-display text-lg font-bold text-[#0d1c2e]">
-                Solicitar Reprogramación
+                {t("Solicitar Reprogramación")}
               </h2>
               <p className="text-xs text-[#3e494a]">
                 {resumen.especialidadNombre} · {resumen.profesionalNombre}
@@ -161,7 +166,7 @@ export const ReprogramarCitaModal: React.FC<ReprogramarCitaModalProps> = ({
             type="button"
             onClick={onClose}
             className="text-[#3e494a] hover:text-[#0d1c2e] p-1.5 rounded-lg hover:bg-[#dce9ff] transition-colors"
-            title="Cerrar ventana"
+            title={t("Cerrar ventana")}
           >
             <span className="material-symbols-outlined text-[20px]">close</span>
           </button>
@@ -171,14 +176,15 @@ export const ReprogramarCitaModal: React.FC<ReprogramarCitaModalProps> = ({
           <div className="p-3 bg-[#e6eeff] rounded-xl flex items-start gap-2.5 text-xs text-[#3e494a]">
             <span className="material-symbols-outlined text-[18px] text-[#006066] shrink-0 mt-0.5">help_outline</span>
             <p className="leading-snug">
-              El nuevo turno se busca con el mismo profesional y especialidad. Tu cita actual sigue vigente hasta
-              que la coordinación administrativa apruebe o rechace la solicitud (queda en estado{' '}
-              <strong>PENDING</strong>).
-            </p>
+              {t(
+                "El nuevo turno se busca con el mismo profesional y especialidad. Tu cita actual sigue vigente hasta que la coordinación administrativa apruebe o rechace la solicitud (queda en estado"
+              )}{' '}
+              <strong>{t("PENDING")}</strong>).
+                          </p>
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-semibold text-[#0d1c2e]">Sede</label>
+            <label className="text-xs font-semibold text-[#0d1c2e]">{t("Sede")}</label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {([1, 2] as SedeId[]).map((sedeId) => (
                 <label
@@ -207,7 +213,7 @@ export const ReprogramarCitaModal: React.FC<ReprogramarCitaModalProps> = ({
 
           <div className="flex flex-col gap-2">
             <label htmlFor="reschedule-date" className="text-xs font-semibold text-[#0d1c2e]">
-              Nueva fecha
+              {t("Nueva fecha")}
             </label>
             <div className="relative flex items-center">
               <span className="material-symbols-outlined text-[18px] text-[#006066] absolute left-3 pointer-events-none">
@@ -225,12 +231,12 @@ export const ReprogramarCitaModal: React.FC<ReprogramarCitaModalProps> = ({
           </div>
 
           <div className="flex flex-col gap-2.5">
-            <label className="text-xs font-semibold text-[#0d1c2e]">Turnos disponibles</label>
+            <label className="text-xs font-semibold text-[#0d1c2e]">{t("Turnos disponibles")}</label>
 
             {loadingHorarios && (
               <div className="py-6 flex flex-col items-center text-center text-[#6e797a]">
                 <span className="material-symbols-outlined text-[26px] text-[#0d7a82] animate-spin">progress_activity</span>
-                <p className="text-xs mt-2">Consultando disponibilidad real...</p>
+                <p className="text-xs mt-2">{t("Consultando disponibilidad real...")}</p>
               </div>
             )}
 
@@ -243,7 +249,9 @@ export const ReprogramarCitaModal: React.FC<ReprogramarCitaModalProps> = ({
 
             {!loadingHorarios && !availabilityError && horarios.length === 0 && (
               <div className="p-4 rounded-xl bg-[#f8f9ff] border border-[#e6eeff] text-xs text-[#3e494a] text-center">
-                Este profesional no tiene turnos disponibles en esa sede/fecha. Prueba otra fecha.
+                {t(
+                  "Este profesional no tiene turnos disponibles en esa sede/fecha. Prueba otra fecha."
+                )}
               </div>
             )}
 
@@ -285,7 +293,7 @@ export const ReprogramarCitaModal: React.FC<ReprogramarCitaModalProps> = ({
               disabled={enviando}
               className="px-4 py-2 rounded-xl text-xs font-medium text-[#436088] hover:bg-[#eff4ff] transition-colors disabled:opacity-50"
             >
-              Descartar
+              {t("Descartar")}
             </button>
             <button
               type="button"
@@ -294,7 +302,7 @@ export const ReprogramarCitaModal: React.FC<ReprogramarCitaModalProps> = ({
               className="px-5 py-2.5 rounded-xl text-xs font-semibold bg-gradient-to-r from-[#006066] to-[#0d7a82] text-white shadow-md hover:shadow-lg transition-all flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span className="material-symbols-outlined text-[16px]">send</span>
-              <span>{enviando ? 'Enviando...' : 'Confirmar y Enviar Solicitud'}</span>
+              <span>{enviando ? 'Enviando...' : t("Confirmar y Enviar Solicitud")}</span>
             </button>
           </div>
         </div>

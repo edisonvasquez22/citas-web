@@ -1,11 +1,11 @@
 import React from 'react';
 import { UserSession } from '../types';
+import { getLanguage, t } from '../i18n';
 
 interface HeaderProps {
   session: UserSession | null;
   onLogout: () => void;
   onOpenSupport: () => void;
-  language: 'ES' | 'EN';
   onToggleLanguage: () => void;
 }
 
@@ -13,7 +13,6 @@ export const Header: React.FC<HeaderProps> = ({
   session,
   onLogout,
   onOpenSupport,
-  language,
   onToggleLanguage
 }) => {
   return (
@@ -26,14 +25,14 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex flex-col">
           <div className="flex items-center gap-1.5">
             <span className="font-display font-semibold text-[18px] sm:text-[20px] text-[#006066] tracking-tight">
-              FCV Citas
+              {t("FCV Citas")}
             </span>
             <span className="px-1.5 py-0.5 rounded-full bg-[#d4e3ff] text-[#001c3a] text-[11px] font-semibold tracking-wider uppercase">
-              Labs
+              {t("Labs")}
             </span>
           </div>
           <span className="text-[12px] text-[#3e494a] font-medium leading-none">
-            {language === 'ES' ? 'Laboratorio de Entrenamiento' : 'Clinical Training Laboratory'}
+            {t("Laboratorio de Entrenamiento")}
           </span>
         </div>
       </div>
@@ -44,11 +43,11 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           onClick={onToggleLanguage}
           className="flex items-center gap-1 text-[#3e494a] hover:text-[#0d1c2e] px-2 py-1 rounded-md transition-colors bg-white/70 hover:bg-white border border-[#e6eeff]"
-          title={language === 'ES' ? 'Cambiar a Inglés' : 'Switch to Spanish'}
+          title={t("Cambiar a Inglés")}
           type="button"
         >
           <span className="material-symbols-outlined text-[18px] text-[#436088]">language</span>
-          <span className="text-[12px] font-semibold uppercase">{language}</span>
+          <span className="text-[12px] font-semibold uppercase">{getLanguage()}</span>
         </button>
 
         {/* Support */}
@@ -58,7 +57,7 @@ export const Header: React.FC<HeaderProps> = ({
           type="button"
         >
           <span className="material-symbols-outlined text-[16px]">help_outline</span>
-          <span className="hidden sm:inline">{language === 'ES' ? 'Soporte' : 'Support'}</span>
+          <span className="hidden sm:inline">{t("Soporte")}</span>
         </button>
 
         {/* Authenticated user pill / Logout */}
@@ -75,7 +74,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={onLogout}
               className="p-1.5 text-[#6e797a] hover:text-[#ba1a1a] hover:bg-[#ffdad6]/40 rounded-lg transition-colors"
-              title={language === 'ES' ? 'Cerrar Sesión' : 'Sign Out'}
+              title={t("Cerrar Sesión")}
               type="button"
             >
               <span className="material-symbols-outlined text-[18px]">logout</span>

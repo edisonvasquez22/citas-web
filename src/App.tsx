@@ -19,6 +19,7 @@ import { AprobacionCitasScreen } from './components/AprobacionCitasScreen';
 import { AdminCatalogoScreen } from './components/AdminCatalogoScreen';
 import { AdminEpsScreen } from './components/AdminEpsScreen';
 import { BandejaReprogramacionesScreen } from './components/BandejaReprogramacionesScreen';
+import { getLanguage, Language, setLanguage as persistLanguage, t } from './i18n';
 
 const SCREEN_KEY = 'fcv.screen';
 
@@ -39,10 +40,18 @@ export default function App() {
   const [session, setSessionState] = useState<UserSession | null>(() => getSession());
   const [activeScreen, setActiveScreen] = useState<ActiveScreen>(() => initialScreen(getSession()));
   const [sesionExpirada, setSesionExpirada] = useState(false);
-  const [language, setLanguage] = useState<'ES' | 'EN'>('ES');
+  // El estado solo fuerza el re-render; la fuente de verdad del idioma es el módulo i18n.
+  const [language, setLanguageState] = useState<Language>(() => getLanguage());
+  const toggleLanguage = () => {
+    const siguiente: Language = language === 'ES' ? 'EN' : 'ES';
+    persistLanguage(siguiente);
+    setLanguageState(siguiente);
+  };
 
   const [isSupportOpen, setIsSupportOpen] = useState(false);
   const [isRecoveryOpen, setIsRecoveryOpen] = useState(false);
+
+  useEffect(() => persistLanguage(getLanguage()), []);
 
   useEffect(
     () =>
@@ -105,8 +114,7 @@ export default function App() {
         session={session}
         onLogout={handleLogout}
         onOpenSupport={() => setIsSupportOpen(true)}
-        language={language}
-        onToggleLanguage={() => setLanguage(language === 'ES' ? 'EN' : 'ES')}
+        onToggleLanguage={toggleLanguage}
       />
 
       <main className="w-full flex-1 flex flex-col items-center justify-center">
@@ -118,7 +126,7 @@ export default function App() {
                 className="mt-6 mx-4 max-w-[440px] w-full text-[13px] bg-amber-50 border border-amber-200 text-amber-950 rounded-lg p-3 flex gap-2"
               >
                 <span className="material-symbols-outlined text-[18px]">timer_off</span>
-                Tu sesión expiró. Inicia sesión nuevamente para continuar.
+                {t("Tu sesión expiró. Inicia sesión nuevamente para continuar.")}
               </p>
             )}
             <LoginView
@@ -136,7 +144,7 @@ export default function App() {
         {session && (
           <>
             {activeScreen === 'success-landing' &&
-              pacienteScreen(<InicioPacienteScreen language={language} onNavigate={navigate} />, true)}
+              pacienteScreen(<InicioPacienteScreen onNavigate={navigate} />, true)}
 
             {activeScreen === 'agendar-cita' &&
               pacienteScreen(
@@ -179,16 +187,16 @@ export default function App() {
 
       <footer className="w-full py-4 text-center text-[11px] text-[#3e494a] border-t border-[#eff4ff]">
         <div className="max-w-[1280px] mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span>© 2026 FCV Citas • Fundación Cardiovascular. Plataforma Segura.</span>
+          <span>{t("© 2026 FCV Citas • Fundación Cardiovascular. Plataforma Segura.")}</span>
           <div className="flex items-center gap-3 text-[10px] text-[#6e797a]">
-            <span>ISO/IEC 27001 Salud</span>
+            <span>{t("ISO/IEC 27001 Salud")}</span>
             <span>•</span>
-            <span>Floridablanca, Santander, Colombia</span>
+            <span>{t("Floridablanca, Santander, Colombia")}</span>
           </div>
         </div>
       </footer>
 
-      <SupportModal isOpen={isSupportOpen} onClose={() => setIsSupportOpen(false)} language={language} />
+      <SupportModal isOpen={isSupportOpen} onClose={() => setIsSupportOpen(false)} />
 
       <PasswordRecoveryModal isOpen={isRecoveryOpen} onClose={() => setIsRecoveryOpen(false)} />
     </div>

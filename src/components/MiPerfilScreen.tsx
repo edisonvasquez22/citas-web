@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { AfiliacionApi, EpsApi, PerfilApi, PlanEpsApi, REGIMENES } from '../types';
 import { apiFetch } from '../api/session';
 import { mensajeDeError } from '../api/errors';
+import { t } from '../i18n';
 
 const inputClass =
   'w-full px-3 py-2 rounded-lg bg-[#eff4ff] border border-[#bdc9ca]/60 text-sm text-[#0d1c2e] focus:outline-none focus:ring-2 focus:ring-[#0d7a82] disabled:opacity-60';
@@ -34,6 +35,7 @@ export const MiPerfilScreen: React.FC = () => {
   const [afiliacion, setAfiliacion] = useState<AfiliacionApi | null>(null);
   const [eps, setEps] = useState<EpsApi[]>([]);
   const [planes, setPlanes] = useState<PlanEpsApi[]>([]);
+  const [cargandoPlanes, setCargandoPlanes] = useState(false);
   const [epsId, setEpsId] = useState<number | ''>('');
   const [planId, setPlanId] = useState<number | ''>('');
   const [numeroAfiliacion, setNumeroAfiliacion] = useState('');
@@ -71,7 +73,7 @@ export const MiPerfilScreen: React.FC = () => {
           setNumeroAfiliacion(a.numeroAfiliacion);
         }
       } catch {
-        if (!cancelado) setErrorCarga('No se pudo cargar tu perfil. Inténtalo de nuevo más tarde.');
+        if (!cancelado) setErrorCarga(t("No se pudo cargar tu perfil. Inténtalo de nuevo más tarde."));
       } finally {
         if (!cancelado) setCargando(false);
       }
@@ -87,6 +89,7 @@ export const MiPerfilScreen: React.FC = () => {
       return;
     }
     let cancelado = false;
+    setCargandoPlanes(true);
     apiFetch(`/api/eps/${epsId}/plans`)
       .then((r) => (r.ok ? r.json() : []))
       .then((lista: PlanEpsApi[]) => {
@@ -94,6 +97,9 @@ export const MiPerfilScreen: React.FC = () => {
       })
       .catch(() => {
         if (!cancelado) setPlanes([]);
+      })
+      .finally(() => {
+        if (!cancelado) setCargandoPlanes(false);
       });
     return () => {
       cancelado = true;
@@ -104,7 +110,7 @@ export const MiPerfilScreen: React.FC = () => {
     e.preventDefault();
     setAvisoPerfil(null);
     if (!nombres.trim() || !apellidos.trim() || !telefono.trim()) {
-      setAvisoPerfil({ tipo: 'error', texto: 'Nombres, apellidos y teléfono son obligatorios.' });
+      setAvisoPerfil({ tipo: 'error', texto: t("Nombres, apellidos y teléfono son obligatorios.") });
       return;
     }
     setGuardandoPerfil(true);
@@ -115,13 +121,13 @@ export const MiPerfilScreen: React.FC = () => {
         body: JSON.stringify({ nombres: nombres.trim(), apellidos: apellidos.trim(), telefono: telefono.trim() })
       });
       if (!resp.ok) {
-        setAvisoPerfil({ tipo: 'error', texto: await mensajeDeError(resp, 'No se pudo actualizar el perfil.') });
+        setAvisoPerfil({ tipo: 'error', texto: await mensajeDeError(resp, t("No se pudo actualizar el perfil.")) });
         return;
       }
       setPerfil(await resp.json());
-      setAvisoPerfil({ tipo: 'ok', texto: 'Perfil actualizado.' });
+      setAvisoPerfil({ tipo: 'ok', texto: t("Perfil actualizado.") });
     } catch {
-      setAvisoPerfil({ tipo: 'error', texto: 'No se pudo contactar al servidor.' });
+      setAvisoPerfil({ tipo: 'error', texto: t("No se pudo contactar al servidor.") });
     } finally {
       setGuardandoPerfil(false);
     }
@@ -131,7 +137,7 @@ export const MiPerfilScreen: React.FC = () => {
     e.preventDefault();
     setAvisoAfiliacion(null);
     if (epsId === '' || planId === '' || !numeroAfiliacion.trim()) {
-      setAvisoAfiliacion({ tipo: 'error', texto: 'Selecciona EPS, plan e ingresa el número de afiliación.' });
+      setAvisoAfiliacion({ tipo: 'error', texto: t("Selecciona EPS, plan e ingresa el número de afiliación.") });
       return;
     }
     setGuardandoAfiliacion(true);
@@ -144,14 +150,14 @@ export const MiPerfilScreen: React.FC = () => {
       if (!resp.ok) {
         setAvisoAfiliacion({
           tipo: 'error',
-          texto: await mensajeDeError(resp, 'No se pudo guardar la afiliación.')
+          texto: await mensajeDeError(resp, t("No se pudo guardar la afiliación."))
         });
         return;
       }
       setAfiliacion(await resp.json());
-      setAvisoAfiliacion({ tipo: 'ok', texto: 'Afiliación guardada.' });
+      setAvisoAfiliacion({ tipo: 'ok', texto: t("Afiliación guardada.") });
     } catch {
-      setAvisoAfiliacion({ tipo: 'error', texto: 'No se pudo contactar al servidor.' });
+      setAvisoAfiliacion({ tipo: 'error', texto: t("No se pudo contactar al servidor.") });
     } finally {
       setGuardandoAfiliacion(false);
     }
@@ -161,7 +167,7 @@ export const MiPerfilScreen: React.FC = () => {
     return (
       <div className="py-10 flex flex-col items-center text-center text-[#6e797a]">
         <span className="material-symbols-outlined text-[36px] text-[#0d7a82] animate-spin">progress_activity</span>
-        <p className="text-sm mt-3">Cargando tu perfil...</p>
+        <p className="text-sm mt-3">{t("Cargando tu perfil...")}</p>
       </div>
     );
   }
@@ -171,7 +177,7 @@ export const MiPerfilScreen: React.FC = () => {
       <div className="rounded-xl p-6 bg-[#ffdad6] text-[#93000a] border border-[#ba1a1a]/20 flex items-start gap-4">
         <span className="material-symbols-outlined text-[28px]">wifi_off</span>
         <div>
-          <h3 className="font-bold">Error de Conexión</h3>
+          <h3 className="font-bold">{t("Error de Conexión")}</h3>
           <p className="text-sm mt-1">{errorCarga}</p>
         </div>
       </div>
@@ -185,36 +191,38 @@ export const MiPerfilScreen: React.FC = () => {
       <div className="pb-5 border-b border-[#eff4ff]">
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#dce9ff] text-[#001c3a] text-[11px] font-bold tracking-wider uppercase mb-2">
           <span className="material-symbols-outlined text-[14px]">badge</span>
-          Mi Cuenta
+          {t("Mi Cuenta")}
         </span>
-        <h1 className="font-display text-2xl sm:text-3xl font-bold text-[#0d1c2e] tracking-tight">Mi Perfil</h1>
+        <h1 className="font-display text-2xl sm:text-3xl font-bold text-[#0d1c2e] tracking-tight">{t("Mi Perfil")}</h1>
         <p className="text-sm text-[#3e494a] mt-1 max-w-2xl">
-          Mantén actualizados tus datos de contacto y tu afiliación a EPS para agendar citas.
+          {t(
+            "Mantén actualizados tus datos de contacto y tu afiliación a EPS para agendar citas."
+          )}
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <form onSubmit={guardarPerfil} className="bg-white rounded-xl shadow-sm border border-[#e6eeff] p-5 space-y-4" noValidate>
-          <h2 className="font-display font-semibold text-lg text-[#0d1c2e]">Datos personales</h2>
+          <h2 className="font-display font-semibold text-lg text-[#0d1c2e]">{t("Datos personales")}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <label className={labelClass}>
-              Nombres
+              {t("Nombres")}
               <input value={nombres} onChange={(e) => setNombres(e.target.value)} className={`${inputClass} mt-1`} />
             </label>
             <label className={labelClass}>
-              Apellidos
+              {t("Apellidos")}
               <input value={apellidos} onChange={(e) => setApellidos(e.target.value)} className={`${inputClass} mt-1`} />
             </label>
             <label className={labelClass}>
-              Teléfono
+              {t("Teléfono")}
               <input value={telefono} onChange={(e) => setTelefono(e.target.value)} className={`${inputClass} mt-1`} />
             </label>
             <label className={labelClass}>
-              Correo (no editable)
+              {t("Correo (no editable)")}
               <input value={perfil.email} disabled className={`${inputClass} mt-1`} />
             </label>
             <label className={`${labelClass} sm:col-span-2`}>
-              Documento (no editable)
+              {t("Documento (no editable)")}
               <input value={`${perfil.tipoDocumento} ${perfil.numeroDocumento}`} disabled className={`${inputClass} mt-1`} />
             </label>
           </div>
@@ -224,38 +232,42 @@ export const MiPerfilScreen: React.FC = () => {
             disabled={guardandoPerfil}
             className="px-4 py-2 bg-[#006066] hover:bg-[#0d7a82] text-white text-sm font-semibold rounded-lg disabled:opacity-60"
           >
-            {guardandoPerfil ? 'Guardando…' : 'Guardar cambios'}
+            {guardandoPerfil ? 'Guardando…' : t("Guardar cambios")}
           </button>
         </form>
 
         <form onSubmit={guardarAfiliacion} className="bg-white rounded-xl shadow-sm border border-[#e6eeff] p-5 space-y-4" noValidate>
           <div className="flex items-center justify-between">
-            <h2 className="font-display font-semibold text-lg text-[#0d1c2e]">Afiliación EPS</h2>
+            <h2 className="font-display font-semibold text-lg text-[#0d1c2e]">{t("Afiliación EPS")}</h2>
             <span
               className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
                 afiliacion ? 'bg-emerald-100 text-emerald-900' : 'bg-amber-100 text-amber-900'
               }`}
             >
-              {afiliacion ? 'Registrada' : 'Sin afiliación'}
+              {afiliacion ? t("Registrada") : t("Sin afiliación")}
             </span>
           </div>
           {afiliacion && (
             <p className="text-[13px] text-[#3e494a]">
-              Actual: <strong>{afiliacion.epsNombre}</strong> · {afiliacion.planNombre} ·{' '}
-              {REGIMENES[afiliacion.regimenId] ?? `Régimen ${afiliacion.regimenId}`} · N.º {afiliacion.numeroAfiliacion}
+              {t("Actual:")} <strong>{afiliacion.epsNombre}</strong>· {afiliacion.planNombre}·{' '}
+              {REGIMENES[afiliacion.regimenId] ?? t("Régimen {regimenId}", {
+                regimenId: afiliacion.regimenId
+              })} {t("· N.º")} {afiliacion.numeroAfiliacion}
             </p>
           )}
           <label className={labelClass}>
-            EPS
+            {t("EPS")}
             <select
               value={epsId}
               onChange={(e) => {
                 setEpsId(e.target.value ? Number(e.target.value) : '');
                 setPlanId('');
+                // Sin esto, mientras cargan los planes nuevos se podía elegir un plan de la EPS anterior (400).
+                setPlanes([]);
               }}
               className={`${inputClass} mt-1`}
             >
-              <option value="">Selecciona una EPS</option>
+              <option value="">{t("Selecciona una EPS")}</option>
               {eps.map((x) => (
                 <option key={x.id} value={x.id}>
                   {x.nombre}
@@ -264,15 +276,15 @@ export const MiPerfilScreen: React.FC = () => {
             </select>
           </label>
           <label className={labelClass}>
-            Plan
+            {t("Plan")}
             <select
               value={planId}
               onChange={(e) => setPlanId(e.target.value ? Number(e.target.value) : '')}
-              disabled={epsId === ''}
+              disabled={epsId === '' || cargandoPlanes}
               className={`${inputClass} mt-1`}
             >
-              <option value="">{epsId === '' ? 'Primero selecciona una EPS' : 'Selecciona un plan'}</option>
-              {planes.map((p) => (
+              <option value="">{epsId === '' ? t("Primero selecciona una EPS") : t("Selecciona un plan")}</option>
+              {planes.filter((p) => p.epsId === epsId).map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.nombre}
                 </option>
@@ -281,11 +293,11 @@ export const MiPerfilScreen: React.FC = () => {
           </label>
           {planSeleccionado && (
             <p className="text-[12px] text-[#6e797a]">
-              Régimen: {REGIMENES[planSeleccionado.regimenId] ?? planSeleccionado.regimenId}
+              {t("Régimen:")} {REGIMENES[planSeleccionado.regimenId] ?? planSeleccionado.regimenId}
             </p>
           )}
           <label className={labelClass}>
-            Número de afiliación
+            {t("Número de afiliación")}
             <input
               value={numeroAfiliacion}
               onChange={(e) => setNumeroAfiliacion(e.target.value)}
@@ -298,7 +310,7 @@ export const MiPerfilScreen: React.FC = () => {
             disabled={guardandoAfiliacion}
             className="px-4 py-2 bg-[#006066] hover:bg-[#0d7a82] text-white text-sm font-semibold rounded-lg disabled:opacity-60"
           >
-            {guardandoAfiliacion ? 'Guardando…' : afiliacion ? 'Actualizar afiliación' : 'Registrar afiliación'}
+            {guardandoAfiliacion ? 'Guardando…' : afiliacion ? t("Actualizar afiliación") : t("Registrar afiliación")}
           </button>
         </form>
       </div>

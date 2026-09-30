@@ -1,5 +1,6 @@
 import React from 'react';
 import { ActiveScreen } from '../types';
+import { t } from '../i18n';
 
 export interface NavTabItem {
   screen: ActiveScreen;
@@ -14,7 +15,7 @@ interface NavTabsProps {
 }
 
 export const NavTabs: React.FC<NavTabsProps> = ({ items, active, onNavigate }) => (
-  <nav className="flex items-center gap-2 mb-4 flex-wrap" aria-label="Navegación principal">
+  <nav className="flex items-center gap-2 mb-4 flex-wrap" aria-label={t("Navegación principal")}>
     {items.map((item) => (
       <button
         key={item.screen}
@@ -28,7 +29,7 @@ export const NavTabs: React.FC<NavTabsProps> = ({ items, active, onNavigate }) =
         }`}
       >
         <span className="material-symbols-outlined text-[16px]">{item.icon}</span>
-        {item.label}
+        {t(item.label)}
       </button>
     ))}
   </nav>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { AdminAppointmentApi } from '../types';
 import { formatDateTimeRange } from '../utils/dateFormatter';
+import { t } from '../i18n';
 
 interface AppointmentRequestCardProps {
   appointment: AdminAppointmentApi;
@@ -39,11 +40,11 @@ export const AppointmentRequestCard: React.FC<AppointmentRequestCardProps> = ({
         <div>
           <div className="flex items-center justify-between gap-2 mb-3">
             <span className="font-mono text-[11px] text-[#436088] font-bold uppercase tracking-wider">
-              SOLICITUD #{appointment.citaId}
+              {t("SOLICITUD #")}{appointment.citaId}
             </span>
             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#ffeed9] text-[#7a4100] text-[12px] font-semibold">
               <span className="material-symbols-outlined text-[14px]">hourglass_top</span>
-              <span>REQUESTED</span>
+              <span>{t("REQUESTED")}</span>
             </span>
           </div>
 
@@ -53,9 +54,9 @@ export const AppointmentRequestCard: React.FC<AppointmentRequestCardProps> = ({
             </div>
             <div>
               <span className="text-[15px] font-bold text-[#0d1c2e] font-display block">
-                Paciente #{appointment.pacienteUsuarioId}
+                {t("Paciente #")}{appointment.pacienteUsuarioId}
               </span>
-              <span className="block text-[11px] text-[#6e797a]">Identificador único asistencial</span>
+              <span className="block text-[11px] text-[#6e797a]">{t("Identificador único asistencial")}</span>
             </div>
           </div>
 
@@ -63,7 +64,7 @@ export const AppointmentRequestCard: React.FC<AppointmentRequestCardProps> = ({
             <div className="flex items-start gap-2.5">
               <span className="material-symbols-outlined text-[#436088] text-[18px] shrink-0 mt-0.5">location_on</span>
               <div className="min-w-0 flex-1">
-                <span className="block text-[11px] text-[#3e494a] font-medium">Sede Asistencial</span>
+                <span className="block text-[11px] text-[#3e494a] font-medium">{t("Sede Asistencial")}</span>
                 <span className="text-[14px] font-semibold text-[#0d1c2e] truncate block" title={sedeNombre}>
                   {sedeNombre}
                 </span>
@@ -73,11 +74,11 @@ export const AppointmentRequestCard: React.FC<AppointmentRequestCardProps> = ({
             <div className="flex items-start gap-2.5">
               <span className="material-symbols-outlined text-[#006066] text-[18px] shrink-0 mt-0.5">medical_services</span>
               <div className="min-w-0 flex-1">
-                <span className="block text-[11px] text-[#3e494a] font-medium">Especialidad Solicitada</span>
+                <span className="block text-[11px] text-[#3e494a] font-medium">{t("Especialidad Solicitada")}</span>
                 <span className="text-[14px] font-semibold text-[#0d1c2e]">
                   {especialidadNombre}
                   {especialidadDuracionMinutos !== null && (
-                    <span className="font-normal text-[#436088] text-[12px]"> ({especialidadDuracionMinutos} min)</span>
+                    <span className="font-normal text-[#436088] text-[12px]">({especialidadDuracionMinutos} {t("min)")}</span>
                   )}
                 </span>
               </div>
@@ -86,7 +87,7 @@ export const AppointmentRequestCard: React.FC<AppointmentRequestCardProps> = ({
             <div className="flex items-start gap-2.5">
               <span className="material-symbols-outlined text-[#436088] text-[18px] shrink-0 mt-0.5">badge</span>
               <div className="min-w-0 flex-1">
-                <span className="block text-[11px] text-[#3e494a] font-medium">Especialista Asignado</span>
+                <span className="block text-[11px] text-[#3e494a] font-medium">{t("Especialista Asignado")}</span>
                 <span className="text-[14px] font-semibold text-[#0d1c2e]">{profesionalNombre}</span>
               </div>
             </div>
@@ -94,7 +95,7 @@ export const AppointmentRequestCard: React.FC<AppointmentRequestCardProps> = ({
             <div className="flex items-start gap-2.5 p-2 rounded-lg bg-[#eff4ff]/80 border border-[#d5e3fc]/60">
               <span className="material-symbols-outlined text-[#006066] text-[18px] shrink-0 mt-0.5">calendar_clock</span>
               <div className="min-w-0 flex-1">
-                <span className="block text-[11px] text-[#3e494a] font-medium">Horario Solicitado</span>
+                <span className="block text-[11px] text-[#3e494a] font-medium">{t("Horario Solicitado")}</span>
                 <span className="text-[13px] font-semibold text-[#0d1c2e] block">{dateText}</span>
               </div>
             </div>
@@ -108,7 +109,7 @@ export const AppointmentRequestCard: React.FC<AppointmentRequestCardProps> = ({
             className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-[#006066] hover:underline"
           >
             <span className="material-symbols-outlined text-[16px]">history</span>
-            Ver historial
+            {t("Ver historial")}
           </button>
         )}
 
@@ -118,10 +119,10 @@ export const AppointmentRequestCard: React.FC<AppointmentRequestCardProps> = ({
             onClick={() => onRejectClick(appointment)}
             disabled={isProcessing}
             className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg bg-[#fff5f5] hover:bg-[#fee2e2] text-[#ba1a1a] text-[14px] font-semibold transition active:scale-95 border border-[#ffdad6] disabled:opacity-60 disabled:cursor-not-allowed"
-            title="Rechazar solicitud con motivo justificado"
+            title={t("Rechazar solicitud con motivo justificado")}
           >
             <span className="material-symbols-outlined text-[18px]">close</span>
-            <span>Rechazar</span>
+            <span>{t("Rechazar")}</span>
           </button>
 
           <button
@@ -129,10 +130,10 @@ export const AppointmentRequestCard: React.FC<AppointmentRequestCardProps> = ({
             onClick={() => onApprove(appointment.citaId)}
             disabled={isProcessing}
             className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg bg-[#006066] hover:bg-[#0d7a82] text-white text-[14px] font-semibold shadow-sm transition active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
-            title="Aprobar y confirmar cita en agenda"
+            title={t("Aprobar y confirmar cita en agenda")}
           >
             <span className="material-symbols-outlined text-[18px]">check_circle</span>
-            <span>{isProcessing ? 'Procesando...' : 'Aprobar'}</span>
+            <span>{isProcessing ? 'Procesando...' : t("Aprobar")}</span>
           </button>
         </div>
       </div>

@@ -4,6 +4,7 @@ import { apiFetch } from '../api/session';
 import { formatDateTimeRange } from '../utils/dateFormatter';
 import { AdminNavTabs } from './AdminNavTabs';
 import { ProfessionalNavTabs } from './ProfessionalNavTabs';
+import { t } from '../i18n';
 
 interface Metrica {
   label: string;
@@ -53,7 +54,7 @@ const Panel: React.FC<{
     </div>
     {error ? (
       <p role="alert" className="rounded-xl p-4 bg-[#ffdad6] text-[#93000a] text-sm">
-        No se pudo cargar el resumen. Inténtalo de nuevo más tarde.
+        {t("No se pudo cargar el resumen. Inténtalo de nuevo más tarde.")}
       </p>
     ) : !metricas ? (
       <div className="py-10 flex justify-center">
@@ -98,16 +99,16 @@ export const InicioProfesionalScreen: React.FC<{ onNavigate: (s: ActiveScreen) =
 
   const hoy = hoyLocal();
   const metricas: Metrica[] | null = datos && [
-    { label: 'Citas hoy', valor: datos.agenda.filter((c) => c.inicio.startsWith(hoy)).length, icon: 'today', destino: 'mi-agenda' },
-    { label: 'Citas próximas', valor: datos.agenda.length, icon: 'event_available', destino: 'mi-agenda' },
+    { label: t("Citas hoy"), valor: datos.agenda.filter((c) => c.inicio.startsWith(hoy)).length, icon: 'today', destino: 'mi-agenda' },
+    { label: t("Citas próximas"), valor: datos.agenda.length, icon: 'event_available', destino: 'mi-agenda' },
     {
-      label: 'Bloques futuros',
+      label: t("Bloques futuros"),
       valor: datos.bloques.filter((b) => b.activo && b.fecha >= hoy).length,
       icon: 'calendar_month',
       destino: 'mi-disponibilidad'
     },
     {
-      label: 'Sedes con bloques',
+      label: t("Sedes con bloques"),
       valor: new Set(datos.bloques.filter((b) => b.fecha >= hoy).map((b) => b.sedeId)).size,
       icon: 'domain'
     }
@@ -118,21 +119,21 @@ export const InicioProfesionalScreen: React.FC<{ onNavigate: (s: ActiveScreen) =
     <div className="max-w-7xl mx-auto w-full flex-1 px-4 sm:px-6 py-6 sm:py-8 flex flex-col gap-6">
       <ProfessionalNavTabs active="inicio-profesional" onNavigate={onNavigate} />
       <Panel
-        titulo="Inicio del Profesional"
-        subtitulo="Resumen de tu agenda confirmada y de tu disponibilidad publicada."
+        titulo={t("Inicio del Profesional")}
+        subtitulo={t("Resumen de tu agenda confirmada y de tu disponibilidad publicada.")}
         metricas={metricas}
         error={error}
         onNavigate={onNavigate}
       >
         <section className="bg-white rounded-xl shadow-sm border border-[#e6eeff] p-5">
-          <h2 className="text-[11px] font-bold uppercase tracking-wider text-[#6e797a] mb-2">Próxima atención</h2>
+          <h2 className="text-[11px] font-bold uppercase tracking-wider text-[#6e797a] mb-2">{t("Próxima atención")}</h2>
           {proxima ? (
             <p className="text-sm text-[#0d1c2e]">
-              Paciente #{proxima.pacienteUsuarioId} · {formatDateTimeRange(proxima.inicio, proxima.fin)} ·{' '}
+              {t("Paciente #")}{proxima.pacienteUsuarioId}· {formatDateTimeRange(proxima.inicio, proxima.fin)}·{' '}
               {SEDES[proxima.sedeId]?.nombre}
             </p>
           ) : (
-            <p className="text-sm text-[#6e797a]">No tienes citas confirmadas próximas.</p>
+            <p className="text-sm text-[#6e797a]">{t("No tienes citas confirmadas próximas.")}</p>
           )}
         </section>
       </Panel>
@@ -153,28 +154,28 @@ export const InicioAdminScreen: React.FC<{ onNavigate: (s: ActiveScreen) => void
   });
 
   const metricas: Metrica[] | null = datos && [
-    { label: 'Citas por aprobar', valor: datos.solicitudes.length, icon: 'fact_check', destino: 'aprobacion-citas' },
+    { label: t("Citas por aprobar"), valor: datos.solicitudes.length, icon: 'fact_check', destino: 'aprobacion-citas' },
     {
-      label: 'Reprogramaciones pendientes',
+      label: t("Reprogramaciones pendientes"),
       valor: datos.reprogramaciones.length,
       icon: 'event_repeat',
       destino: 'admin-reprogramaciones'
     },
     {
-      label: 'Profesionales activos',
+      label: t("Profesionales activos"),
       valor: datos.profesionales.filter((p) => p.activo).length,
       icon: 'stethoscope',
       destino: 'admin-catalogo'
     },
-    { label: 'EPS activas', valor: datos.eps.filter((e) => e.activa).length, icon: 'health_and_safety', destino: 'admin-eps' }
+    { label: t("EPS activas"), valor: datos.eps.filter((e) => e.activa).length, icon: 'health_and_safety', destino: 'admin-eps' }
   ];
 
   return (
     <div className="max-w-7xl mx-auto w-full flex-1 px-4 sm:px-6 py-6 sm:py-8 flex flex-col gap-6">
       <AdminNavTabs active="inicio-admin" onNavigate={onNavigate} />
       <Panel
-        titulo="Inicio del Administrador"
-        subtitulo="Pendientes de gestión y estado de los catálogos. Haz clic en una tarjeta para ir a la bandeja."
+        titulo={t("Inicio del Administrador")}
+        subtitulo={t("Pendientes de gestión y estado de los catálogos. Haz clic en una tarjeta para ir a la bandeja.")}
         metricas={metricas}
         error={error}
         onNavigate={onNavigate}
