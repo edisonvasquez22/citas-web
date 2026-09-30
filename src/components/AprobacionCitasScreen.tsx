@@ -1,10 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActiveScreen, AdminAppointmentApi, ApiErrorBody, ProfessionalApi, SedeId, SEDES, SpecialtyApi, UserSession } from '../types';
 import { AppointmentRequestCard } from './AppointmentRequestCard';
+import { HistorialCitaModal } from './HistorialCitaModal';
 import { RejectAppointmentModal } from './RejectAppointmentModal';
 import { AdminNavTabs } from './AdminNavTabs';
+import { API_URL, apiFetch } from '../api/session';
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
 
 interface AprobacionCitasScreenProps {
   session: UserSession;
@@ -35,6 +36,7 @@ export const AprobacionCitasScreen: React.FC<AprobacionCitasScreenProps> = ({ se
   const [loadError, setLoadError] = useState<string | null>(null);
   const [processingCitaId, setProcessingCitaId] = useState<number | null>(null);
   const [rejectingAppointment, setRejectingAppointment] = useState<AdminAppointmentApi | null>(null);
+  const [historialCitaId, setHistorialCitaId] = useState<number | null>(null);
 
   const [feedback, setFeedback] = useState<{ type: 'success' | 'info'; title: string; message: string } | null>(null);
   const [filtros, setFiltros] = useState<Filtros>(FILTROS_VACIOS);
@@ -45,8 +47,8 @@ export const AprobacionCitasScreen: React.FC<AprobacionCitasScreenProps> = ({ se
     (async () => {
       try {
         const [respEsp, respProf] = await Promise.all([
-          fetch(`${API_URL}/api/specialties`, { headers: authHeaders }),
-          fetch(`${API_URL}/api/professionals`, { headers: authHeaders })
+          apiFetch(`${API_URL}/api/specialties`, { headers: authHeaders }),
+          apiFetch(`${API_URL}/api/professionals`, { headers: authHeaders })
         ]);
         if (!respEsp.ok || !respProf.ok) return;
         const esp: SpecialtyApi[] = await respEsp.json();
@@ -78,7 +80,7 @@ export const AprobacionCitasScreen: React.FC<AprobacionCitasScreenProps> = ({ se
       const query = params.toString();
 
       try {
-        const resp = await fetch(`${API_URL}/api/admin/appointments/requested${query ? `?${query}` : ''}`, {
+        const resp = await apiFetch(`${API_URL}/api/admin/appointments/requested${query ? `?${query}` : ''}`, {
           headers: authHeaders
         });
         if (!resp.ok) throw new Error();
@@ -106,7 +108,7 @@ export const AprobacionCitasScreen: React.FC<AprobacionCitasScreenProps> = ({ se
   const handleApprove = async (citaId: number) => {
     setProcessingCitaId(citaId);
     try {
-      const resp = await fetch(`${API_URL}/api/admin/appointments/${citaId}/approve`, {
+      const resp = await apiFetch(`${API_URL}/api/admin/appointments/${citaId}/approve`, {
         method: 'POST',
         headers: authHeaders
       });
@@ -348,6 +350,7 @@ export const AprobacionCitasScreen: React.FC<AprobacionCitasScreenProps> = ({ se
                 isProcessing={processingCitaId === cita.citaId}
                 onApprove={handleApprove}
                 onRejectClick={setRejectingAppointment}
+                onHistoryClick={setHistorialCitaId}
               />
             );
           })}
@@ -358,6 +361,8 @@ export const AprobacionCitasScreen: React.FC<AprobacionCitasScreenProps> = ({ se
         Fundación Cardiovascular de Colombia • Coordinación Médica Administrativa • Protección de datos conforme a la
         Ley 1581 de 2012.
       </div>
+
+      <HistorialCitaModal citaId={historialCitaId} onClose={() => setHistorialCitaId(null)} />
 
       <RejectAppointmentModal
         appointment={rejectingAppointment}

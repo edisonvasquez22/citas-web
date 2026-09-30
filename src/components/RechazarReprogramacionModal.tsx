@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ApiErrorBody, SolicitudReprogramacionApi, UserSession } from '../types';
+import { API_URL, apiFetch } from '../api/session';
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
 
 const PRESET_MOTIVOS = [
   'El nuevo horario ya no está disponible para el profesional.',
@@ -50,7 +50,7 @@ export const RechazarReprogramacionModal: React.FC<RechazarReprogramacionModalPr
     setSubmitting(true);
     setError(null);
     try {
-      const resp = await fetch(`${API_URL}/api/admin/reschedules/${solicitud.solicitudId}/reject`, {
+      const resp = await apiFetch(`${API_URL}/api/admin/reschedules/${solicitud.solicitudId}/reject`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

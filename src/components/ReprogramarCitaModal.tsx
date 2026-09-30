@@ -8,8 +8,8 @@ import {
   SEDES,
   UserSession
 } from '../types';
+import { API_URL, apiFetch } from '../api/session';
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
 
 interface ReprogramarCitaModalProps {
   session: UserSession;
@@ -70,7 +70,7 @@ export const ReprogramarCitaModal: React.FC<ReprogramarCitaModalProps> = ({
       profesionalId: String(cita.profesionalId)
     });
 
-    fetch(`${API_URL}/api/availability?${params.toString()}`, { headers: authHeaders })
+    apiFetch(`${API_URL}/api/availability?${params.toString()}`, { headers: authHeaders })
       .then(async (resp) => {
         if (!resp.ok) throw new Error();
         return (await resp.json()) as HorarioDisponible[];
@@ -103,7 +103,7 @@ export const ReprogramarCitaModal: React.FC<ReprogramarCitaModalProps> = ({
     };
 
     try {
-      const resp = await fetch(`${API_URL}/api/appointments/${cita.citaId}/reschedule`, {
+      const resp = await apiFetch(`${API_URL}/api/appointments/${cita.citaId}/reschedule`, {
         method: 'POST',
         headers: authHeaders,
         body: JSON.stringify(body)

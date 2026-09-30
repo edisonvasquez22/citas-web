@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ApiErrorBody, DocumentType, ProfessionalAdminApi, SedeId, SEDES, SpecialtyApi, UserSession } from '../types';
+import { API_URL, apiFetch } from '../api/session';
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
 
 interface ProfessionalFormModalProps {
   isOpen: boolean;
@@ -94,7 +94,7 @@ export const ProfessionalFormModal: React.FC<ProfessionalFormModalProps> = ({
     setSaving(true);
     setError(null);
     try {
-      const resp = await fetch(`${API_URL}/api/admin/professionals`, {
+      const resp = await apiFetch(`${API_URL}/api/admin/professionals`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.accessToken}` },
         body: JSON.stringify({

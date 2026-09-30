@@ -10,8 +10,8 @@ import {
 } from '../types';
 import { AdminNavTabs } from './AdminNavTabs';
 import { RechazarReprogramacionModal } from './RechazarReprogramacionModal';
+import { API_URL, apiFetch } from '../api/session';
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
 
 interface BandejaReprogramacionesScreenProps {
   session: UserSession;
@@ -46,8 +46,8 @@ export const BandejaReprogramacionesScreen: React.FC<BandejaReprogramacionesScre
     setLoadError(null);
     try {
       const [respSol, respProf] = await Promise.all([
-        fetch(`${API_URL}/api/admin/reschedules`, { headers: authHeaders }),
-        fetch(`${API_URL}/api/professionals`, { headers: authHeaders })
+        apiFetch(`${API_URL}/api/admin/reschedules`, { headers: authHeaders }),
+        apiFetch(`${API_URL}/api/professionals`, { headers: authHeaders })
       ]);
       if (!respSol.ok || !respProf.ok) throw new Error();
       const dataSol: SolicitudReprogramacionApi[] = await respSol.json();
@@ -83,7 +83,7 @@ export const BandejaReprogramacionesScreen: React.FC<BandejaReprogramacionesScre
   const handleApprove = async (solicitudId: number) => {
     setProcessingId(solicitudId);
     try {
-      const resp = await fetch(`${API_URL}/api/admin/reschedules/${solicitudId}/approve`, {
+      const resp = await apiFetch(`${API_URL}/api/admin/reschedules/${solicitudId}/approve`, {
         method: 'POST',
         headers: authHeaders
       });

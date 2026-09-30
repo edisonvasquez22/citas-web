@@ -11,6 +11,7 @@ interface AppointmentRequestCardProps {
   isProcessing: boolean;
   onApprove: (citaId: number) => void;
   onRejectClick: (appointment: AdminAppointmentApi) => void;
+  onHistoryClick?: (citaId: number) => void;
 }
 
 export const AppointmentRequestCard: React.FC<AppointmentRequestCardProps> = ({
@@ -21,7 +22,8 @@ export const AppointmentRequestCard: React.FC<AppointmentRequestCardProps> = ({
   profesionalNombre,
   isProcessing,
   onApprove,
-  onRejectClick
+  onRejectClick,
+  onHistoryClick
 }) => {
   const dateText = formatDateTimeRange(appointment.inicio, appointment.fin);
 
@@ -98,6 +100,17 @@ export const AppointmentRequestCard: React.FC<AppointmentRequestCardProps> = ({
             </div>
           </div>
         </div>
+
+        {onHistoryClick && (
+          <button
+            type="button"
+            onClick={() => onHistoryClick(appointment.citaId)}
+            className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-[#006066] hover:underline"
+          >
+            <span className="material-symbols-outlined text-[16px]">history</span>
+            Ver historial
+          </button>
+        )}
 
         <div className="mt-4 pt-3 border-t border-[#e6eeff] flex items-center gap-3">
           <button

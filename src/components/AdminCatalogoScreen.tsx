@@ -2,9 +2,10 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { ActiveScreen, ProfessionalAdminApi, SEDES, SpecialtyApi, UserSession } from '../types';
 import { SpecialtyFormModal } from './SpecialtyFormModal';
 import { ProfessionalFormModal } from './ProfessionalFormModal';
+import { AsignacionesProfesionalModal } from './AsignacionesProfesionalModal';
 import { AdminNavTabs } from './AdminNavTabs';
+import { API_URL, apiFetch } from '../api/session';
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
 
 interface AdminCatalogoScreenProps {
   session: UserSession;
@@ -29,14 +30,15 @@ export const AdminCatalogoScreen: React.FC<AdminCatalogoScreenProps> = ({ sessio
   const [specialtyModalOpen, setSpecialtyModalOpen] = useState(false);
   const [specialtyToEdit, setSpecialtyToEdit] = useState<SpecialtyApi | null>(null);
   const [professionalModalOpen, setProfessionalModalOpen] = useState(false);
+  const [profesionalAsignaciones, setProfesionalAsignaciones] = useState<ProfessionalAdminApi | null>(null);
 
   const loadAll = async () => {
     setLoading(true);
     setLoadError(null);
     try {
       const [respEsp, respProf] = await Promise.all([
-        fetch(`${API_URL}/api/admin/specialties`, { headers: authHeaders }),
-        fetch(`${API_URL}/api/admin/professionals`, { headers: authHeaders })
+        apiFetch(`${API_URL}/api/admin/specialties`, { headers: authHeaders }),
+        apiFetch(`${API_URL}/api/admin/professionals`, { headers: authHeaders })
       ]);
       if (!respEsp.ok || !respProf.ok) throw new Error();
       setSpecialties(await respEsp.json());
@@ -57,7 +59,7 @@ export const AdminCatalogoScreen: React.FC<AdminCatalogoScreenProps> = ({ sessio
 
   const handleToggleSpecialty = async (spec: SpecialtyApi) => {
     try {
-      const resp = await fetch(`${API_URL}/api/admin/specialties/${spec.id}/status`, {
+      const resp = await apiFetch(`${API_URL}/api/admin/specialties/${spec.id}/status`, {
         method: 'PATCH',
         headers: authHeaders,
         body: JSON.stringify({ activa: !spec.activa })
@@ -84,7 +86,7 @@ export const AdminCatalogoScreen: React.FC<AdminCatalogoScreenProps> = ({ sessio
 
   const handleToggleProfessional = async (prof: ProfessionalAdminApi) => {
     try {
-      const resp = await fetch(`${API_URL}/api/admin/professionals/${prof.profesionalId}/status`, {
+      const resp = await apiFetch(`${API_URL}/api/admin/professionals/${prof.profesionalId}/status`, {
         method: 'PATCH',
         headers: authHeaders,
         body: JSON.stringify({ activo: !prof.activo })
@@ -343,7 +345,14 @@ export const AdminCatalogoScreen: React.FC<AdminCatalogoScreenProps> = ({ sessio
                             <span className="px-2.5 py-1 rounded-full bg-[#e6eeff] text-[#6e797a] text-xs font-semibold">Inactivo</span>
                           )}
                         </td>
-                        <td className="py-3.5 px-6 text-right">
+                        <td className="py-3.5 px-6 text-right whitespace-nowrap">
+                          <button
+                            type="button"
+                            onClick={() => setProfesionalAsignaciones(prof)}
+                            className="px-2.5 py-1 rounded-lg hover:bg-[#e6eeff] text-[#006066] text-xs font-semibold"
+                          >
+                            Editar asignaciones
+                          </button>
                           <button
                             type="button"
                             onClick={() => handleToggleProfessional(prof)}
@@ -375,6 +384,16 @@ export const AdminCatalogoScreen: React.FC<AdminCatalogoScreenProps> = ({ sessio
         session={session}
         onClose={() => setProfessionalModalOpen(false)}
         onCreated={handleProfessionalCreated}
+      />
+      <AsignacionesProfesionalModal
+        profesional={profesionalAsignaciones}
+        activeSpecialties={activeSpecialties}
+        onClose={() => setProfesionalAsignaciones(null)}
+        onSaved={(nombre) => {
+          setProfesionalAsignaciones(null);
+          setFeedback({ type: 'success', title: 'Asignaciones actualizadas', message: `Se actualizaron las especialidades y sedes de ${nombre}.` });
+          loadAll();
+        }}
       />
     </div>
   );

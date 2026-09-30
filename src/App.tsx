@@ -1,48 +1,106 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { UserSession, ActiveScreen } from './types';
+import { API_URL, getSession, setSession, subscribe } from './api/session';
+import { homeScreenFor, isScreenAllowed } from './navigation';
 import { Header } from './components/Header';
 import { LoginView } from './components/LoginView';
 import { RegisterScreen } from './components/RegisterScreen';
-import { SuccessView } from './components/SuccessView';
 import { SupportModal } from './components/SupportModal';
 import { PasswordRecoveryModal } from './components/PasswordRecoveryModal';
 import { AgendarCitaScreen } from './components/AgendarCitaScreen';
 import { MisCitasScreen } from './components/MisCitasScreen';
+import { MiPerfilScreen } from './components/MiPerfilScreen';
+import { InicioPacienteScreen } from './components/InicioPacienteScreen';
+import { InicioAdminScreen, InicioProfesionalScreen } from './components/InicioRolScreens';
+import { PatientNavTabs } from './components/NavTabs';
 import { DisponibilidadProfesionalScreen } from './components/DisponibilidadProfesionalScreen';
 import { AgendaProfesionalScreen } from './components/AgendaProfesionalScreen';
 import { AprobacionCitasScreen } from './components/AprobacionCitasScreen';
 import { AdminCatalogoScreen } from './components/AdminCatalogoScreen';
+import { AdminEpsScreen } from './components/AdminEpsScreen';
 import { BandejaReprogramacionesScreen } from './components/BandejaReprogramacionesScreen';
 
+const SCREEN_KEY = 'fcv.screen';
+
+function initialScreen(session: UserSession | null): ActiveScreen {
+  if (!session) return 'login';
+  let stored: string | null = null;
+  try {
+    stored = sessionStorage.getItem(SCREEN_KEY);
+  } catch {
+    stored = null;
+  }
+  return stored && isScreenAllowed(stored as ActiveScreen, session.roles)
+    ? (stored as ActiveScreen)
+    : homeScreenFor(session.roles);
+}
+
 export default function App() {
-  const [session, setSession] = useState<UserSession | null>(null);
-  const [activeScreen, setActiveScreen] = useState<ActiveScreen>('login');
+  const [session, setSessionState] = useState<UserSession | null>(() => getSession());
+  const [activeScreen, setActiveScreen] = useState<ActiveScreen>(() => initialScreen(getSession()));
+  const [sesionExpirada, setSesionExpirada] = useState(false);
   const [language, setLanguage] = useState<'ES' | 'EN'>('ES');
 
-  // Modals
   const [isSupportOpen, setIsSupportOpen] = useState(false);
   const [isRecoveryOpen, setIsRecoveryOpen] = useState(false);
 
-  const handleLoginSuccess = (newSession: UserSession) => {
-    setSession(newSession);
-    // PROFESSIONAL/ADMIN aterrizan directo en su pantalla de gestión (HU-012/HU-016); no hay landing propio para esos roles.
-    if (newSession.roles.includes('PROFESSIONAL')) {
-      setActiveScreen('mi-disponibilidad');
-    } else if (newSession.roles.includes('ADMIN')) {
-      setActiveScreen('aprobacion-citas');
-    } else {
-      setActiveScreen('success-landing');
+  useEffect(
+    () =>
+      subscribe((nueva, reason) => {
+        setSessionState(nueva);
+        if (!nueva) {
+          setActiveScreen('login');
+          setSesionExpirada(reason === 'expired');
+        }
+      }),
+    []
+  );
+
+  useEffect(() => {
+    try {
+      if (session) sessionStorage.setItem(SCREEN_KEY, activeScreen);
+      else sessionStorage.removeItem(SCREEN_KEY);
+    } catch {
+      // Sin almacenamiento: solo se pierde la pantalla actual al recargar.
     }
+  }, [activeScreen, session]);
+
+  const navigate = (screen: ActiveScreen) => {
+    if (session && !isScreenAllowed(screen, session.roles)) return;
+    setActiveScreen(screen);
+  };
+
+  const handleLoginSuccess = (newSession: UserSession) => {
+    setSesionExpirada(false);
+    setSession(newSession);
+    setActiveScreen(homeScreenFor(newSession.roles));
   };
 
   const handleLogout = () => {
+    const actual = getSession();
+    if (actual) {
+      // Revoca el refresh token; si falla, la sesión local se cierra igual.
+      fetch(`${API_URL}/api/auth/logout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken: actual.refreshToken })
+      }).catch(() => undefined);
+    }
     setSession(null);
-    setActiveScreen('login');
   };
+
+  // Agendar y Mis Citas ya traen su propio contenedor con padding; Inicio y Mi Perfil no.
+  const pacienteScreen = (contenido: React.ReactNode, conPadding = false) => (
+    <div className="max-w-7xl mx-auto w-full flex-1 pt-6 sm:pt-8 flex flex-col">
+      <div className="px-4 sm:px-6">
+        <PatientNavTabs active={activeScreen} onNavigate={navigate} />
+      </div>
+      {conPadding ? <div className="px-4 sm:px-6 pb-8">{contenido}</div> : contenido}
+    </div>
+  );
 
   return (
     <div className="min-h-screen flex flex-col justify-between bg-[#f8f9ff] text-[#0d1c2e] font-sans antialiased">
-      {/* Universal Institutional Header */}
       <Header
         session={session}
         onLogout={handleLogout}
@@ -51,67 +109,74 @@ export default function App() {
         onToggleLanguage={() => setLanguage(language === 'ES' ? 'EN' : 'ES')}
       />
 
-      {/* Main Content Render */}
       <main className="w-full flex-1 flex flex-col items-center justify-center">
         {activeScreen === 'login' && (
-          <LoginView
-            onLoginSuccess={handleLoginSuccess}
-            onOpenRecovery={() => setIsRecoveryOpen(true)}
-            onOpenRegister={() => setActiveScreen('register')}
-          />
+          <>
+            {sesionExpirada && (
+              <p
+                role="alert"
+                className="mt-6 mx-4 max-w-[440px] w-full text-[13px] bg-amber-50 border border-amber-200 text-amber-950 rounded-lg p-3 flex gap-2"
+              >
+                <span className="material-symbols-outlined text-[18px]">timer_off</span>
+                Tu sesión expiró. Inicia sesión nuevamente para continuar.
+              </p>
+            )}
+            <LoginView
+              onLoginSuccess={handleLoginSuccess}
+              onOpenRecovery={() => setIsRecoveryOpen(true)}
+              onOpenRegister={() => setActiveScreen('register')}
+            />
+          </>
         )}
 
         {activeScreen === 'register' && (
-          <RegisterScreen
-            onGoToLogin={() => setActiveScreen('login')}
-            onOpenSupport={() => setIsSupportOpen(true)}
-          />
+          <RegisterScreen onGoToLogin={() => setActiveScreen('login')} onOpenSupport={() => setIsSupportOpen(true)} />
         )}
 
-        {activeScreen === 'success-landing' && session && (
-          <SuccessView
-            session={session}
-            onLogout={handleLogout}
-            language={language}
-            onGoToBooking={() => setActiveScreen('agendar-cita')}
-            onGoToMisCitas={() => setActiveScreen('mis-citas')}
-          />
-        )}
+        {session && (
+          <>
+            {activeScreen === 'success-landing' &&
+              pacienteScreen(<InicioPacienteScreen language={language} onNavigate={navigate} />, true)}
 
-        {activeScreen === 'agendar-cita' && session && (
-          <AgendarCitaScreen session={session} onVolverInicio={() => setActiveScreen('success-landing')} />
-        )}
+            {activeScreen === 'agendar-cita' &&
+              pacienteScreen(
+                <AgendarCitaScreen session={session} onVolverInicio={() => navigate('success-landing')} />
+              )}
 
-        {activeScreen === 'mis-citas' && session && (
-          <MisCitasScreen
-            session={session}
-            onNuevaCita={() => setActiveScreen('agendar-cita')}
-            onVolverInicio={() => setActiveScreen('success-landing')}
-          />
-        )}
+            {activeScreen === 'mis-citas' &&
+              pacienteScreen(
+                <MisCitasScreen
+                  session={session}
+                  onNuevaCita={() => navigate('agendar-cita')}
+                  onVolverInicio={() => navigate('success-landing')}
+                />
+              )}
 
-        {activeScreen === 'mi-disponibilidad' && session && (
-          <DisponibilidadProfesionalScreen session={session} onNavigate={setActiveScreen} />
-        )}
+            {activeScreen === 'mi-perfil' && pacienteScreen(<MiPerfilScreen />, true)}
 
-        {activeScreen === 'mi-agenda' && session && (
-          <AgendaProfesionalScreen session={session} onNavigate={setActiveScreen} />
-        )}
+            {activeScreen === 'inicio-profesional' && <InicioProfesionalScreen onNavigate={navigate} />}
 
-        {activeScreen === 'aprobacion-citas' && session && (
-          <AprobacionCitasScreen session={session} onNavigate={setActiveScreen} />
-        )}
+            {activeScreen === 'mi-disponibilidad' && (
+              <DisponibilidadProfesionalScreen session={session} onNavigate={navigate} />
+            )}
 
-        {activeScreen === 'admin-catalogo' && session && (
-          <AdminCatalogoScreen session={session} onNavigate={setActiveScreen} />
-        )}
+            {activeScreen === 'mi-agenda' && <AgendaProfesionalScreen session={session} onNavigate={navigate} />}
 
-        {activeScreen === 'admin-reprogramaciones' && session && (
-          <BandejaReprogramacionesScreen session={session} onNavigate={setActiveScreen} />
+            {activeScreen === 'inicio-admin' && <InicioAdminScreen onNavigate={navigate} />}
+
+            {activeScreen === 'aprobacion-citas' && <AprobacionCitasScreen session={session} onNavigate={navigate} />}
+
+            {activeScreen === 'admin-catalogo' && <AdminCatalogoScreen session={session} onNavigate={navigate} />}
+
+            {activeScreen === 'admin-eps' && <AdminEpsScreen onNavigate={navigate} />}
+
+            {activeScreen === 'admin-reprogramaciones' && (
+              <BandejaReprogramacionesScreen session={session} onNavigate={navigate} />
+            )}
+          </>
         )}
       </main>
 
-      {/* Institutional Footer */}
       <footer className="w-full py-4 text-center text-[11px] text-[#3e494a] border-t border-[#eff4ff]">
         <div className="max-w-[1280px] mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>© 2026 FCV Citas • Fundación Cardiovascular. Plataforma Segura.</span>
@@ -123,17 +188,9 @@ export default function App() {
         </div>
       </footer>
 
-      {/* Global Modals */}
-      <SupportModal
-        isOpen={isSupportOpen}
-        onClose={() => setIsSupportOpen(false)}
-        language={language}
-      />
+      <SupportModal isOpen={isSupportOpen} onClose={() => setIsSupportOpen(false)} language={language} />
 
-      <PasswordRecoveryModal
-        isOpen={isRecoveryOpen}
-        onClose={() => setIsRecoveryOpen(false)}
-      />
+      <PasswordRecoveryModal isOpen={isRecoveryOpen} onClose={() => setIsRecoveryOpen(false)} />
     </div>
   );
 }

@@ -3,8 +3,8 @@ import { ActiveScreen, ApiErrorBody, AvailabilityBlockApi, SedeId, SEDES, UserSe
 import { EditAvailabilityBlockModal } from './EditAvailabilityBlockModal';
 import { DeleteAvailabilityBlockModal } from './DeleteAvailabilityBlockModal';
 import { ProfessionalNavTabs } from './ProfessionalNavTabs';
+import { API_URL, apiFetch } from '../api/session';
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
 
 interface DisponibilidadProfesionalScreenProps {
   session: UserSession;
@@ -84,7 +84,7 @@ export const DisponibilidadProfesionalScreen: React.FC<DisponibilidadProfesional
     setLoadError(null);
 
     try {
-      const resp = await fetch(`${API_URL}/api/professionals/me/availability-blocks`, { headers: authHeaders });
+      const resp = await apiFetch(`${API_URL}/api/professionals/me/availability-blocks`, { headers: authHeaders });
       if (!resp.ok) throw new Error();
       const data: AvailabilityBlockApi[] = await resp.json();
       setBlocks(data);
@@ -121,7 +121,7 @@ export const DisponibilidadProfesionalScreen: React.FC<DisponibilidadProfesional
 
     setCreating(true);
     try {
-      const resp = await fetch(`${API_URL}/api/professionals/me/availability-blocks`, {
+      const resp = await apiFetch(`${API_URL}/api/professionals/me/availability-blocks`, {
         method: 'POST',
         headers: authHeaders,
         body: JSON.stringify({

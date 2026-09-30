@@ -11,8 +11,9 @@ import {
 } from '../types';
 import { CancelarCitaModal } from './CancelarCitaModal';
 import { ReprogramarCitaModal } from './ReprogramarCitaModal';
+import { HistorialCitaModal } from './HistorialCitaModal';
+import { API_URL, apiFetch } from '../api/session';
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
 
 interface MisCitasScreenProps {
   session: UserSession;
@@ -53,6 +54,7 @@ export const MisCitasScreen: React.FC<MisCitasScreenProps> = ({ session, onNueva
   };
 
   const [citas, setCitas] = useState<MiCitaApi[]>([]);
+  const [historialCitaId, setHistorialCitaId] = useState<number | null>(null);
   const [specialties, setSpecialties] = useState<SpecialtyApi[]>([]);
   const [professionals, setProfessionals] = useState<ProfessionalApi[]>([]);
   const [loading, setLoading] = useState(true);
@@ -71,9 +73,9 @@ export const MisCitasScreen: React.FC<MisCitasScreenProps> = ({ session, onNueva
     setLoadError(null);
     try {
       const [respCitas, respEsp, respProf] = await Promise.all([
-        fetch(`${API_URL}/api/appointments/mine`, { headers: authHeaders }),
-        fetch(`${API_URL}/api/specialties`, { headers: authHeaders }),
-        fetch(`${API_URL}/api/professionals`, { headers: authHeaders })
+        apiFetch(`${API_URL}/api/appointments/mine`, { headers: authHeaders }),
+        apiFetch(`${API_URL}/api/specialties`, { headers: authHeaders }),
+        apiFetch(`${API_URL}/api/professionals`, { headers: authHeaders })
       ]);
       if (!respCitas.ok || !respEsp.ok || !respProf.ok) {
         throw new Error('No se pudo cargar la información.');
@@ -438,6 +440,14 @@ export const MisCitasScreen: React.FC<MisCitasScreenProps> = ({ session, onNueva
                         <span>Reprogramar</span>
                       </button>
                     )}
+                    <button
+                      type="button"
+                      onClick={() => setHistorialCitaId(cita.citaId)}
+                      className="px-3.5 py-1.5 rounded-lg text-xs font-medium text-[#3e494a] hover:bg-[#eff4ff] transition-all flex items-center gap-1.5"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">history</span>
+                      <span>Historial</span>
+                    </button>
                     {puedeCancelar && (
                       <button
                         type="button"
@@ -455,6 +465,8 @@ export const MisCitasScreen: React.FC<MisCitasScreenProps> = ({ session, onNueva
           })}
         </div>
       )}
+
+      <HistorialCitaModal citaId={historialCitaId} onClose={() => setHistorialCitaId(null)} />
 
       {citaParaCancelar && (
         <CancelarCitaModal

@@ -2,9 +2,8 @@
 export type Rol = 'USER' | 'PROFESSIONAL' | 'ADMIN';
 
 /**
- * Sesión autenticada. POST /api/auth/login solo devuelve accessToken/refreshToken (no hay endpoint de
- * perfil todavía, EP-002 sin aprobar); `roles` se decodifica en cliente del propio JWT (ver utils/jwt.ts),
- * no se inventa ni se consulta a un endpoint que no existe.
+ * Sesión autenticada. POST /api/auth/login solo devuelve accessToken/refreshToken; `roles` se decodifica
+ * en cliente del propio JWT (ver utils/jwt.ts). El perfil completo vive en GET /api/users/me (PerfilApi).
  */
 export interface UserSession {
   email: string;
@@ -23,7 +22,11 @@ export type ActiveScreen =
   | 'mi-disponibilidad'
   | 'aprobacion-citas'
   | 'admin-catalogo'
-  | 'admin-reprogramaciones';
+  | 'admin-reprogramaciones'
+  | 'admin-eps'
+  | 'mi-perfil'
+  | 'inicio-profesional'
+  | 'inicio-admin';
 
 /** RF-01: tipoDocumento se guarda como texto libre en el backend (sin catálogo fijo); estos son los valores que ofrece el formulario. */
 export type DocumentType = 'CC' | 'CE' | 'TI' | 'PAS';
@@ -102,9 +105,8 @@ export interface AvailabilityBlockApi {
 }
 
 /**
- * GET /api/admin/appointments/requested, POST .../approve, POST .../reject (HU-016). Solo trae IDs: no hay
- * endpoint de perfil de paciente (EP-002 sin aprobar), así que la UI debe mostrar "Paciente #<id>" y resolver
- * nombre de profesional/especialidad cruzando con /api/professionals y /api/specialties, no inventarlos.
+ * GET /api/admin/appointments/requested, POST .../approve, POST .../reject (HU-016). Solo trae IDs: la UI
+ * muestra "Paciente #<id>" y resuelve profesional/especialidad cruzando con /api/professionals y /api/specialties.
  */
 export interface AdminAppointmentApi {
   citaId: number;
@@ -119,10 +121,8 @@ export interface AdminAppointmentApi {
 }
 
 /**
- * GET/POST/PUT/PATCH /api/admin/professionals (HU-010/HU-011). A diferencia del directorio público
- * (ProfessionalApi), este trae también inactivos y datos de contacto reales (vienen de Usuario, no de
- * Profesional) — necesarios para que el ADMIN pueda listar y reactivar/desactivar. No incluye edición de
- * contacto/especialidades: el backend hoy solo expone crear y cambiar estado.
+ * GET/POST/PATCH /api/admin/professionals (HU-010/HU-011) y PUT /{id}/assignments (RF-07). Trae también
+ * inactivos y datos de contacto (vienen de Usuario). Solo especialidades y sedes son editables.
  */
 export interface ProfessionalAdminApi {
   profesionalId: number;
@@ -197,8 +197,7 @@ export interface ReprogramarResponse {
 
 /**
  * GET /api/professionals/me/agenda (HU-021). Solo trae citas propias en estado APPROVED — una vez cerrada
- * (COMPLETED/NO_SHOW vía HU-022) deja de aparecer aquí, no hay endpoint de historial. pacienteUsuarioId es
- * solo el id: no hay endpoint de perfil de paciente (EP-002 sin aprobar), se muestra "Paciente #<id>".
+ * (COMPLETED/NO_SHOW vía HU-022) deja de aparecer aquí; su trazabilidad está en GET /api/appointments/{id}/history.
  */
 export interface CitaAgendaApi {
   citaId: number;
@@ -233,4 +232,62 @@ export interface ApiErrorBody {
   error: string;
   message: string;
   detalles?: string[];
+}
+
+/** GET/PATCH /api/users/me (HU-004). email y documento no son editables. */
+export interface PerfilApi {
+  id: string;
+  nombres: string;
+  apellidos: string;
+  tipoDocumento: string;
+  numeroDocumento: string;
+  email: string;
+  telefono: string;
+}
+
+/** GET/PUT /api/users/me/afiliacion (HU-005). GET responde 404 si el usuario aún no tiene afiliación. */
+export interface AfiliacionApi {
+  afiliacionId: number;
+  epsId: number;
+  epsNombre: string;
+  planId: number;
+  planNombre: string;
+  regimenId: number;
+  numeroAfiliacion: string;
+}
+
+/** GET /api/eps y /api/admin/eps (HU-007). */
+export interface EpsApi {
+  id: number;
+  codigo: string;
+  nombre: string;
+  activa: boolean;
+}
+
+/** GET /api/eps/{epsId}/plans y /api/admin/eps/{epsId}/plans (HU-008). */
+export interface PlanEpsApi {
+  id: number;
+  epsId: number;
+  regimenId: number;
+  codigo: string;
+  nombre: string;
+  activo: boolean;
+}
+
+/** Catálogo fijo `insurance_regimes` (V2); no hay endpoint, igual que SEDES. */
+export const REGIMENES: Record<number, string> = {
+  1: 'Contributivo',
+  2: 'Subsidiado',
+  3: 'Especial',
+  4: 'Excepción',
+  5: 'Particular'
+};
+
+/** GET /api/appointments/{id}/history (HU-023). */
+export interface HistorialEstadoApi {
+  estado: EstadoCita;
+  fuente: 'SYSTEM' | 'USER' | 'ADMIN';
+  actorUsuarioId: number | null;
+  motivo: string | null;
+  momento: string;
 }

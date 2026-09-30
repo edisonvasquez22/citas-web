@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { AdminAppointmentApi, ApiErrorBody, UserSession } from '../types';
+import { API_URL, apiFetch } from '../api/session';
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
 
 const PRESET_MOTIVOS = [
   'Cupo no disponible para la fecha solicitada.',
@@ -57,7 +57,7 @@ export const RejectAppointmentModal: React.FC<RejectAppointmentModalProps> = ({
     setSubmitting(true);
     setError(null);
     try {
-      const resp = await fetch(`${API_URL}/api/admin/appointments/${appointment.citaId}/reject`, {
+      const resp = await apiFetch(`${API_URL}/api/admin/appointments/${appointment.citaId}/reject`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

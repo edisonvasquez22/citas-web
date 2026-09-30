@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ApiErrorBody, AvailabilityBlockApi, SedeId, SEDES, UserSession } from '../types';
+import { API_URL, apiFetch } from '../api/session';
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
 
 interface EditAvailabilityBlockModalProps {
   block: AvailabilityBlockApi | null;
@@ -60,7 +60,7 @@ export const EditAvailabilityBlockModal: React.FC<EditAvailabilityBlockModalProp
 
     setSaving(true);
     try {
-      const resp = await fetch(`${API_URL}/api/professionals/me/availability-blocks/${block.id}`, {
+      const resp = await apiFetch(`${API_URL}/api/professionals/me/availability-blocks/${block.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

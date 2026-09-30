@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ApiErrorBody, CierreResponse, MiCitaApi, UserSession } from '../types';
+import { API_URL, apiFetch } from '../api/session';
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
 
 interface CancelarCitaModalProps {
   session: UserSession;
@@ -26,7 +26,7 @@ export const CancelarCitaModal: React.FC<CancelarCitaModalProps> = ({
     setEnviando(true);
     setError(null);
     try {
-      const resp = await fetch(`${API_URL}/api/appointments/${cita.citaId}/cancel`, {
+      const resp = await apiFetch(`${API_URL}/api/appointments/${cita.citaId}/cancel`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${session.accessToken}` }
       });

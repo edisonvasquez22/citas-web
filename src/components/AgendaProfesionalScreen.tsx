@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActiveScreen, CierreResponse, CitaAgendaApi, SedeId, SEDES, SpecialtyApi, UserSession } from '../types';
 import { ProfessionalNavTabs } from './ProfessionalNavTabs';
+import { HistorialCitaModal } from './HistorialCitaModal';
 import { CerrarAtencionModal } from './CerrarAtencionModal';
+import { API_URL, apiFetch } from '../api/session';
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
 
 interface AgendaProfesionalScreenProps {
   session: UserSession;
@@ -27,6 +28,7 @@ export const AgendaProfesionalScreen: React.FC<AgendaProfesionalScreenProps> = (
   };
 
   const [citas, setCitas] = useState<CitaAgendaApi[]>([]);
+  const [historialCitaId, setHistorialCitaId] = useState<number | null>(null);
   const [specialties, setSpecialties] = useState<SpecialtyApi[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -48,8 +50,8 @@ export const AgendaProfesionalScreen: React.FC<AgendaProfesionalScreenProps> = (
       if (hasta) params.set('hasta', hasta);
 
       const [respAgenda, respEsp] = await Promise.all([
-        fetch(`${API_URL}/api/professionals/me/agenda?${params.toString()}`, { headers: authHeaders }),
-        fetch(`${API_URL}/api/specialties`, { headers: authHeaders })
+        apiFetch(`${API_URL}/api/professionals/me/agenda?${params.toString()}`, { headers: authHeaders }),
+        apiFetch(`${API_URL}/api/specialties`, { headers: authHeaders })
       ]);
       if (!respAgenda.ok || !respEsp.ok) throw new Error('No se pudo cargar la información.');
 
@@ -265,6 +267,15 @@ export const AgendaProfesionalScreen: React.FC<AgendaProfesionalScreenProps> = (
                       </div>
                     </div>
 
+                    <button
+                      type="button"
+                      onClick={() => setHistorialCitaId(cita.citaId)}
+                      className="self-start inline-flex items-center gap-1 text-xs font-semibold text-[#006066] hover:underline"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">history</span>
+                      Ver historial
+                    </button>
+
                     {yaFinalizo ? (
                       <div className="flex flex-col sm:flex-row items-center justify-end gap-2 pt-2 border-t border-[#e6eeff]">
                         <span className="text-xs text-[#3e494a] mr-auto">Hora de fin ya transcurrida: confirma el resultado de la atención.</span>
@@ -298,6 +309,8 @@ export const AgendaProfesionalScreen: React.FC<AgendaProfesionalScreenProps> = (
           )}
         </>
       )}
+
+      <HistorialCitaModal citaId={historialCitaId} onClose={() => setHistorialCitaId(null)} />
 
       {accionModal && (
         <CerrarAtencionModal

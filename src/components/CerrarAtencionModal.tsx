@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ApiErrorBody, CierreResponse, CitaAgendaApi, UserSession } from '../types';
+import { API_URL, apiFetch } from '../api/session';
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
 
 interface CerrarAtencionModalProps {
   session: UserSession;
@@ -29,7 +29,7 @@ export const CerrarAtencionModal: React.FC<CerrarAtencionModalProps> = ({
     setEnviando(true);
     setError(null);
     try {
-      const resp = await fetch(`${API_URL}/api/appointments/${cita.citaId}/${accion}`, {
+      const resp = await apiFetch(`${API_URL}/api/appointments/${cita.citaId}/${accion}`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${session.accessToken}` }
       });

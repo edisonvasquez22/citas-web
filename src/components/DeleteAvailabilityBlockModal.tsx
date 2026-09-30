@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ApiErrorBody, AvailabilityBlockApi, SEDES, UserSession } from '../types';
+import { API_URL, apiFetch } from '../api/session';
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
 
 interface DeleteAvailabilityBlockModalProps {
   block: AvailabilityBlockApi | null;
@@ -29,7 +29,7 @@ export const DeleteAvailabilityBlockModal: React.FC<DeleteAvailabilityBlockModal
     setDeleting(true);
     setError(null);
     try {
-      const resp = await fetch(`${API_URL}/api/professionals/me/availability-blocks/${block.id}`, {
+      const resp = await apiFetch(`${API_URL}/api/professionals/me/availability-blocks/${block.id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${session.accessToken}` }
       });

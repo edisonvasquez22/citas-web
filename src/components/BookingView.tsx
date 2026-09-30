@@ -11,8 +11,8 @@ import {
   UserSession
 } from '../types';
 import { EmptyStateView } from './EmptyStateView';
+import { API_URL, apiFetch } from '../api/session';
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
 
 export interface ConfirmedBooking {
   result: AppointmentResult;
@@ -71,8 +71,8 @@ export const BookingView: React.FC<BookingViewProps> = ({ session, onConfirmed }
     (async () => {
       try {
         const [respEsp, respProf] = await Promise.all([
-          fetch(`${API_URL}/api/specialties`, { headers: authHeaders }),
-          fetch(`${API_URL}/api/professionals`, { headers: authHeaders })
+          apiFetch(`${API_URL}/api/specialties`, { headers: authHeaders }),
+          apiFetch(`${API_URL}/api/professionals`, { headers: authHeaders })
         ]);
         if (!respEsp.ok || !respProf.ok) {
           throw new Error('No se pudo cargar el catálogo de especialidades/profesionales.');
@@ -136,7 +136,7 @@ export const BookingView: React.FC<BookingViewProps> = ({ session, onConfirmed }
     const params = new URLSearchParams({ especialidadId: String(specialtyId), fecha: date, sedeId: String(sede) });
     if (doctorId !== 'ANY') params.set('profesionalId', String(doctorId));
 
-    fetch(`${API_URL}/api/availability?${params.toString()}`, { headers: authHeaders })
+    apiFetch(`${API_URL}/api/availability?${params.toString()}`, { headers: authHeaders })
       .then(async (resp) => {
         if (!resp.ok) throw new Error('No se pudo consultar la disponibilidad.');
         return (await resp.json()) as HorarioDisponible[];
@@ -173,7 +173,7 @@ export const BookingView: React.FC<BookingViewProps> = ({ session, onConfirmed }
     };
 
     try {
-      const resp = await fetch(`${API_URL}${endpoint}`, {
+      const resp = await apiFetch(`${API_URL}${endpoint}`, {
         method: 'POST',
         headers: authHeaders,
         body: JSON.stringify(body)

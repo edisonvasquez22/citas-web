@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ApiErrorBody, SpecialtyApi, UserSession } from '../types';
+import { API_URL, apiFetch } from '../api/session';
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
 
 interface SpecialtyFormModalProps {
   isOpen: boolean;
@@ -64,7 +64,7 @@ export const SpecialtyFormModal: React.FC<SpecialtyFormModalProps> = ({
           ? { codigo: codigo.trim().toUpperCase(), nombre: nombre.trim(), duracionMinutos, general, requiereAprobacionAdmin }
           : { nombre: nombre.trim(), duracionMinutos, general, requiereAprobacionAdmin };
 
-      const resp = await fetch(url, {
+      const resp = await apiFetch(url, {
         method: mode === 'create' ? 'POST' : 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.accessToken}` },
         body: JSON.stringify(body)
