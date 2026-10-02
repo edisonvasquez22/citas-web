@@ -1,0 +1,81 @@
+#!/bin/sh
+# Hook local (S3, GUIA_SESIONES_S2_S6.md, "Verificacion obligatoria" items 8-10):
+# 1) bloquea el commit si el DIFF STAGED introduce algo que luce como un secreto real;
+# 2) si el diff toca codigo fuente, corre las pruebas/build del repo antes de permitir el commit.
+# Solo mira lineas AGREGADAS (+) del diff staged, no el archivo completo, para no bloquear
+# commits que no tocan las lineas sensibles ya existentes (por ejemplo application.yml).
+
+set -e
+
+REPO_ROOT=$(git rev-parse --show-toplevel)
+cd "$REPO_ROOT"
+
+# Se excluyen fixtures de prueba conocidas (application-test.yml, etc.): ya
+# contienen secretos claramente ficticios ("test-...", "CHANGE_ME...") que no
+# son el objetivo de este escaneo.
+ADDED_LINES=$(git diff --cached -U0 -- . \
+    ':(exclude).git' \
+    ':(exclude)**/src/test/resources/**' \
+  | grep -E '^\+[^+]' || true)
+
+SECRET_PATTERN_KEY='AKIA[0-9A-Z]{16}'
+SECRET_PATTERN_PRIVATEKEY='-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----'
+SECRET_PATTERN_GENERIC='\b(secret|password|passwd|api[_-]?key|access[_-]?key|token)\b[^=:]{0,10}[:=][[:space:]]*['\''"]?[A-Za-z0-9_/+.-]{16,}'
+
+FOUND=""
+
+check_pattern() {
+  pattern="$1"
+  label="$2"
+  MATCHES=$(printf '%s\n' "$ADDED_LINES" \
+    | grep -Ei -e "$pattern" \
+    | grep -Ev '\$\{' \
+    | grep -Eiv 'CHANGE_ME' \
+    | grep -Eiv 'example' \
+    | grep -Eiv 'xxxxxxxx' || true)
+  if [ -n "$MATCHES" ]; then
+    echo ""
+    echo "  [BLOQUEADO] posible secreto real ($label):"
+    printf '%s\n' "$MATCHES" | sed 's/^/    /'
+    FOUND="1"
+  fi
+}
+
+echo "pre-commit: escaneando el diff staged en busca de secretos..."
+check_pattern "$SECRET_PATTERN_KEY" "AWS access key"
+check_pattern "$SECRET_PATTERN_PRIVATEKEY" "clave privada"
+check_pattern "$SECRET_PATTERN_GENERIC" "asignacion de secreto/credencial"
+
+if [ -n "$FOUND" ]; then
+  echo ""
+  echo "Commit rechazado: el diff parece introducir un secreto real."
+  echo "Quita el valor hardcodeado (usa variables de entorno / \${VAR:default}) y vuelve a intentar."
+  exit 1
+fi
+echo "pre-commit: sin secretos detectados en el diff."
+
+STAGED_JAVA=$(git diff --cached --name-only --diff-filter=ACM -- '*.java' || true)
+STAGED_TS=$(git diff --cached --name-only --diff-filter=ACM -- '*.ts' '*.tsx' || true)
+
+if [ -n "$STAGED_JAVA" ] && [ -f "pom.xml" ]; then
+  echo "pre-commit: hay cambios en Java, corriendo 'mvn -q test'..."
+  if ! mvn -q test; then
+    echo "Commit rechazado: 'mvn test' fallo."
+    exit 1
+  fi
+fi
+
+if [ -n "$STAGED_TS" ] && [ -f "package.json" ]; then
+  echo "pre-commit: hay cambios en TypeScript, corriendo build y lint..."
+  if ! npm run build; then
+    echo "Commit rechazado: 'npm run build' fallo."
+    exit 1
+  fi
+  if ! npm run lint; then
+    echo "Commit rechazado: 'npm run lint' fallo."
+    exit 1
+  fi
+fi
+
+echo "pre-commit: verificaciones OK."
+exit 0
